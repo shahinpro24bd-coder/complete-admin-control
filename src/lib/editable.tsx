@@ -70,11 +70,6 @@ export function Icon({ k, d, className = "", brand }: { k?: string | undefined; 
   );
 }
 
-/** Editable link address: in the editor shows a small "link" chip to change where it points. */
-export function useHref(k: string | undefined, d: string) {
-  return useText(k ? `${k}.href` : undefined, d);
-}
-
 export type List<D> = {
   k: string;
   ids: number[];
