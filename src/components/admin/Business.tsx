@@ -1,39 +1,14 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
-import { aed, customerStatement, expenseTotal, invoiceTotal, periodRange, receivedFor } from "@/lib/business";
+import { aed, customerStatement, expenseTotal, periodRange } from "@/lib/business";
 import { printStatement, queueInvoice, useSettings } from "@/components/admin/Billing";
+import { belongsTo, CustomerList, db, matchCustomer, PeriodSelect, pill, today, useTable, type Row } from "@/components/admin/shared";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Row = any;
 type Opt = string | { value: string; label: string };
 export type Field = {
   key: string; label: string; type?: "text" | "date" | "number" | "textarea" | "select" | "customer" | "vat";
   options?: Opt[]; required?: boolean; wide?: boolean; help?: string;
 };
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const db = supabase as any;
-export const today = () => new Date().toISOString().slice(0, 10);
-
-export function useTable(table: string, order = "created_at") {
-  const [rows, setRows] = useState<Row[]>([]);
-  const load = async () => {
-    const { data, error } = await db.from(table).select("*").order(order, { ascending: false });
-    if (error) toast.error(error.message); else setRows(data ?? []);
-  };
-  useEffect(() => { load(); }, [table]);
-  return { rows, load };
-}
-
-/** Finds the saved customer for a typed name (case-insensitive). */
-export const matchCustomer = (name: string | null | undefined, customers: Row[]) =>
-  customers.find((c) => c.name?.trim().toLowerCase() === String(name ?? "").trim().toLowerCase());
-
-export function CustomerList({ customers }: { customers: Row[] }) {
-  return <datalist id="cust-list">{customers.map((c) => <option key={c.id} value={c.name}>{c.company ?? ""}</option>)}</datalist>;
-}
-
-export const pill = (s: string, map: Record<string, string>) => <span className={`badge bg-${map[s] ?? "secondary"} text-capitalize`}>{s}</span>;
 
 export function CrudTable({ title, table, fields, columns, badge, extra, defaults = {}, rows, load, customers = [], top, filter }: {
   title: string; table: string; fields: Field[]; columns: { label: string; render: (r: Row) => ReactNode; right?: boolean }[];
@@ -131,7 +106,7 @@ export function Customers() {
   const inv = useTable("invoices", "issue_date").rows;
   const pay = useTable("payments", "payment_date").rows;
   const { settings } = useSettings();
-  const mine = (c: Row, r: Row) => r.customer_id === c.id || (!r.customer_id && r.customer_name?.trim().toLowerCase() === c.name?.trim().toLowerCase());
+  const mine = belongsTo;
   const balance = (c: Row) => {
     const rows = customerStatement(inv.filter((i) => mine(c, i)), pay.filter((p) => mine(c, p)));
     return rows.length ? rows[rows.length - 1].balance : 0;
@@ -227,12 +202,6 @@ export function Expenses() {
       { label: "Status", render: (r) => <>{pill(r.status, { paid: "success", unpaid: "warning" })}<small className="d-block text-muted">{r.method}</small></> }]} />;
 }
 
-export const periods: [string, string][] = [["this-month", "This month"], ["last-month", "Last month"], ["this-quarter", "This quarter"], ["last-quarter", "Last quarter"], ["this-year", "This year"], ["last-year", "Last year"], ["all", "All time"]];
-export function PeriodSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return <select className="form-select form-select-sm" style={{ width: 160 }} value={value} onChange={(e) => onChange(e.target.value)}>{periods.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>;
-}
-
 // Re-exported so the admin page can import every business screen from one place.
 export { Quotations, Invoices, Payments, BillingSettings } from "@/components/admin/Billing";
 export { Accounts } from "@/components/admin/Accounts";
-export { invoiceTotal, receivedFor };
