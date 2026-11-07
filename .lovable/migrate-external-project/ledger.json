@@ -1,0 +1,12 @@
+[
+  {"capability": "code", "source": "qmep-website-full_1.zip", "outcome": "migrate", "status": "verified", "next_action": "-"},
+  {"capability": "photos", "source": "original project asset store", "outcome": "migrate", "status": "verified", "next_action": "-"},
+  {"capability": "schema", "source": "database/schema.sql + drizzle migrations", "outcome": "migrate", "status": "verified", "next_action": "-"},
+  {"capability": "records: site_content", "source": "old backend public read", "outcome": "migrate", "status": "verified", "next_action": "-"},
+  {"capability": "records: quote_requests, customers, amc_contracts, jobs, invoices", "source": "old backend (admin-only)", "outcome": "migrate", "status": "pending", "next_action": "User exports CSV from old admin/backend"},
+  {"capability": "auth identities", "source": "single admin account", "outcome": "migrate", "status": "pending", "next_action": "Owner runs first-time setup on /auth to choose admin password (default admin123 is rejected as a leaked password)"},
+  {"capability": "authorization", "source": "has_role admin RLS", "outcome": "migrate", "status": "verified", "next_action": "-"},
+  {"capability": "uploaded file bytes", "source": "site-images bucket", "outcome": "migrate", "status": "verified", "next_action": "No uploaded images were referenced in saved content"},
+  {"capability": "public endpoints", "source": "/api/public/img/*", "outcome": "migrate", "status": "implemented", "next_action": "-"},
+  {"capability": "verification", "source": "-", "outcome": "migrate", "status": "verified", "next_action": "Admin setup, page edit (add/remove cards, nav label), save, live site reflects change — tested then test data reset"}
+]
