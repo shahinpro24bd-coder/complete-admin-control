@@ -17,7 +17,9 @@ export type Database = {
       amc_contracts: {
         Row: {
           amount: number | null
+          billing: string
           created_at: string
+          customer_id: string | null
           customer_name: string
           end_date: string | null
           id: string
@@ -31,7 +33,9 @@ export type Database = {
         }
         Insert: {
           amount?: number | null
+          billing?: string
           created_at?: string
+          customer_id?: string | null
           customer_name: string
           end_date?: string | null
           id?: string
@@ -45,7 +49,9 @@ export type Database = {
         }
         Update: {
           amount?: number | null
+          billing?: string
           created_at?: string
+          customer_id?: string | null
           customer_name?: string
           end_date?: string | null
           id?: string
@@ -59,6 +65,24 @@ export type Database = {
         }
         Relationships: []
       }
+      business_settings: {
+        Row: {
+          data: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          data?: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           address: string | null
@@ -69,6 +93,7 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          trn: string | null
         }
         Insert: {
           address?: string | null
@@ -79,6 +104,7 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          trn?: string | null
         }
         Update: {
           address?: string | null
@@ -89,19 +115,76 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          trn?: string | null
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          bill_no: string | null
+          category: string
+          created_at: string
+          description: string | null
+          expense_date: string
+          id: string
+          job_id: string | null
+          method: string
+          notes: string | null
+          status: string
+          supplier: string | null
+          vat_amount: number
+        }
+        Insert: {
+          amount?: number
+          bill_no?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          job_id?: string | null
+          method?: string
+          notes?: string | null
+          status?: string
+          supplier?: string | null
+          vat_amount?: number
+        }
+        Update: {
+          amount?: number
+          bill_no?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          job_id?: string | null
+          method?: string
+          notes?: string | null
+          status?: string
+          supplier?: string | null
+          vat_amount?: number
         }
         Relationships: []
       }
       invoices: {
         Row: {
           amount: number
+          contract_id: string | null
           created_at: string
+          customer_address: string | null
+          customer_id: string | null
           customer_name: string
+          customer_trn: string | null
           description: string | null
+          discount: number
           due_date: string | null
           id: string
           invoice_no: string
           issue_date: string
+          items: Json
+          job_id: string | null
+          lpo_no: string | null
           notes: string | null
           paid_date: string | null
           status: string
@@ -109,13 +192,21 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          contract_id?: string | null
           created_at?: string
+          customer_address?: string | null
+          customer_id?: string | null
           customer_name: string
+          customer_trn?: string | null
           description?: string | null
+          discount?: number
           due_date?: string | null
           id?: string
           invoice_no: string
           issue_date?: string
+          items?: Json
+          job_id?: string | null
+          lpo_no?: string | null
           notes?: string | null
           paid_date?: string | null
           status?: string
@@ -123,13 +214,21 @@ export type Database = {
         }
         Update: {
           amount?: number
+          contract_id?: string | null
           created_at?: string
+          customer_address?: string | null
+          customer_id?: string | null
           customer_name?: string
+          customer_trn?: string | null
           description?: string | null
+          discount?: number
           due_date?: string | null
           id?: string
           invoice_no?: string
           issue_date?: string
+          items?: Json
+          job_id?: string | null
+          lpo_no?: string | null
           notes?: string | null
           paid_date?: string | null
           status?: string
@@ -140,6 +239,7 @@ export type Database = {
       jobs: {
         Row: {
           created_at: string
+          customer_id: string | null
           customer_name: string | null
           id: string
           location: string | null
@@ -154,6 +254,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          customer_id?: string | null
           customer_name?: string | null
           id?: string
           location?: string | null
@@ -168,6 +269,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          customer_id?: string | null
           customer_name?: string | null
           id?: string
           location?: string | null
@@ -179,6 +281,119 @@ export type Database = {
           status?: string
           technician?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          cheque_date: string | null
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          id: string
+          invoice_id: string | null
+          method: string
+          notes: string | null
+          payment_date: string
+          receipt_no: string
+          reference: string | null
+        }
+        Insert: {
+          amount: number
+          cheque_date?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name: string
+          id?: string
+          invoice_id?: string | null
+          method?: string
+          notes?: string | null
+          payment_date?: string
+          receipt_no: string
+          reference?: string | null
+        }
+        Update: {
+          amount?: number
+          cheque_date?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          id?: string
+          invoice_id?: string | null
+          method?: string
+          notes?: string | null
+          payment_date?: string
+          receipt_no?: string
+          reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotations: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_address: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_trn: string | null
+          discount: number
+          id: string
+          invoice_id: string | null
+          issue_date: string
+          items: Json
+          notes: string | null
+          quote_no: string
+          status: string
+          subject: string | null
+          valid_until: string | null
+          vat_percent: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          customer_address?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_trn?: string | null
+          discount?: number
+          id?: string
+          invoice_id?: string | null
+          issue_date?: string
+          items?: Json
+          notes?: string | null
+          quote_no: string
+          status?: string
+          subject?: string | null
+          valid_until?: string | null
+          vat_percent?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_address?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_trn?: string | null
+          discount?: number
+          id?: string
+          invoice_id?: string | null
+          issue_date?: string
+          items?: Json
+          notes?: string | null
+          quote_no?: string
+          status?: string
+          subject?: string | null
+          valid_until?: string | null
+          vat_percent?: number
         }
         Relationships: []
       }

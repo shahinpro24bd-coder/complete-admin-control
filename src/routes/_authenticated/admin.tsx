@@ -6,7 +6,7 @@ import { defaults, makeSlug, mergeServices, type CmsCompany, type CmsFaq, type C
 import { seoDefaults } from "@/lib/seo";
 import { IconPicker } from "@/components/admin/IconPicker";
 import type { Tables } from "@/integrations/supabase/types";
-import { Customers, Contracts, Jobs, Invoices, Reports } from "@/components/admin/Business";
+import { Customers, Contracts, Jobs, Invoices, Quotations, Payments, Expenses, Accounts, BillingSettings } from "@/components/admin/Business";
 import { services as siteServices } from "@/lib/site";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "company" | "services" | "faqs" | "seo" | "quotes" | "account" | "customers" | "amc" | "jobs" | "invoices" | "reports";
+type Tab = "dashboard" | "company" | "services" | "faqs" | "seo" | "quotes" | "account" | "customers" | "amc" | "jobs" | "invoices" | "reports" | "quotations" | "payments" | "expenses" | "billing";
 
 const getSitePages = () => [
   { key: "home", name: "Home", path: "/", icon: "fa-home", desc: "Hero slides, about, services, process, FAQ", edit: true },
@@ -160,8 +160,12 @@ function AdminPage() {
     ["customers", "Customers", "fa-users"],
     ["amc", "AMC Contracts", "fa-file-contract"],
     ["jobs", "Jobs", "fa-wrench"],
+    ["quotations", "Quotations", "fa-file-signature"],
     ["invoices", "Invoices", "fa-file-invoice-dollar"],
-    ["reports", "Reports", "fa-chart-bar"],
+    ["payments", "Payments In", "fa-hand-holding-usd"],
+    ["expenses", "Expenses", "fa-receipt"],
+    ["reports", "Accounts", "fa-chart-bar"],
+    ["billing", "Billing Setup", "fa-cog"],
     ["company", "Contact Info", "fa-building"],
     ["services", "Services", "fa-tools"],
     ["faqs", "FAQs", "fa-question-circle"],
@@ -194,10 +198,14 @@ function AdminPage() {
 
         {tab === "account" && <Account />}
         {tab === "customers" && <Customers />}
-        {tab === "amc" && <Contracts />}
-        {tab === "jobs" && <Jobs />}
+        {tab === "amc" && <Contracts go={setTab as never} />}
+        {tab === "jobs" && <Jobs go={setTab as never} />}
+        {tab === "quotations" && <Quotations go={setTab as never} />}
         {tab === "invoices" && <Invoices />}
-        {tab === "reports" && <Reports />}
+        {tab === "payments" && <Payments />}
+        {tab === "expenses" && <Expenses />}
+        {tab === "reports" && <Accounts />}
+        {tab === "billing" && <BillingSettings />}
 
         {tab === "company" && (
           <div className="bg-white p-4 shadow-sm">
