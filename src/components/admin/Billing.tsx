@@ -25,12 +25,14 @@ export const settingsDefaults: BillingSettingsData = {
 
 export function useSettings() {
   const [settings, setSettings] = useState<BillingSettingsData>(settingsDefaults);
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     db.from("business_settings").select("data").eq("id", 1).maybeSingle().then(({ data }: { data: { data: Partial<BillingSettingsData> } | null }) => {
       if (data?.data) setSettings({ ...settingsDefaults, ...data.data });
+      setLoaded(true);
     });
   }, []);
-  return { settings, setSettings };
+  return { settings, setSettings, loaded };
 }
 
 const addDays = (d: string, n: number) => new Date(Date.parse(d) + n * 864e5).toISOString().slice(0, 10);
@@ -358,7 +360,7 @@ export function Invoices() {
   const pays = useTable("payments", "payment_date");
   const customers = useTable("customers").rows;
   const jobs = useTable("jobs", "scheduled_date").rows;
-  const { settings } = useSettings();
+  const { settings, loaded: settingsLoaded } = useSettings();
   const [edit, setEdit] = useState<Row | null>(null);
   const [payFor, setPayFor] = useState<Row | null>(null);
   const [q, setQ] = useState("");
@@ -366,8 +368,8 @@ export function Invoices() {
   const newDoc = (extra: Row = {}) => ({ invoice_no: nextNumber(settings.invPrefix, t.rows.map((r) => r.invoice_no)), issue_date: today(), due_date: addDays(today(), settings.termsDays), vat_percent: settings.vat, discount: 0, notes: "", ...extra });
 
   useEffect(() => {
-    if (pendingInvoice && t.rows !== undefined) { const p = pendingInvoice; pendingInvoice = null; setEdit(newDoc(p)); }
-  }, [settings]);
+    if (pendingInvoice && t.loaded && settingsLoaded) { const p = pendingInvoice; pendingInvoice = null; setEdit(newDoc(p)); }
+  }, [t.loaded, settingsLoaded]);
 
   const rows = useMemo(() => t.rows.map((r) => {
     const total = invoiceTotal(r), received = receivedFor(r.id, pays.rows);

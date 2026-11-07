@@ -10,12 +10,14 @@ export const today = () => new Date().toISOString().slice(0, 10);
 
 export function useTable(table: string, order = "created_at") {
   const [rows, setRows] = useState<Row[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const load = async () => {
     const { data, error } = await db.from(table).select("*").order(order, { ascending: false });
     if (error) toast.error(error.message); else setRows(data ?? []);
+    setLoaded(true);
   };
   useEffect(() => { load(); }, [table]);
-  return { rows, load };
+  return { rows, load, loaded };
 }
 
 /** Finds the saved customer for a typed name (case-insensitive). */
