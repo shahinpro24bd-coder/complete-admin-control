@@ -127,7 +127,7 @@ export function printReceipt(p: Row, s: BillingSettingsData, invoiceNo?: string)
 }
 
 export function printStatement(c: Row, rows: StatementRow[], s: BillingSettingsData) {
-  const bal = rows.length ? rows[rows.length - 1].balance : 0;
+  const bal = rows.at(-1)?.balance ?? 0;
   printPage(`Statement - ${c.name}`, s, `<h2>STATEMENT OF ACCOUNT</h2>
   <div class="box"><div><b>Customer:</b> ${esc(c.name)}${c.company ? `<br>${esc(c.company)}` : ""}${c.trn ? `<br>TRN: ${esc(c.trn)}` : ""}</div><div class="r"><b>Date:</b> ${today()}</div></div>
   <table><tr><th>Date</th><th>Ref</th><th>Details</th><th class="r">Invoiced</th><th class="r">Paid</th><th class="r">Balance</th></tr>

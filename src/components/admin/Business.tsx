@@ -109,7 +109,7 @@ export function Customers() {
   const mine = belongsTo;
   const balance = (c: Row) => {
     const rows = customerStatement(inv.filter((i) => mine(c, i)), pay.filter((p) => mine(c, p)));
-    return rows.length ? rows[rows.length - 1].balance : 0;
+    return rows.at(-1)?.balance ?? 0;
   };
   return <CrudTable title="Customers" table="customers" {...t}
     fields={[{ key: "name", label: "Name", required: true }, { key: "company", label: "Company" }, { key: "trn", label: "TRN (VAT no.)", help: "Printed on their tax invoices" }, { key: "phone", label: "Phone" }, { key: "email", label: "Email" }, { key: "address", label: "Address" }, { key: "notes", label: "Notes", type: "textarea" }]}

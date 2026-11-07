@@ -53,7 +53,7 @@ const inRange = (d: string | null | undefined, from: string, to: string) => !!d 
 
 /** Date range for a period preset. Dates are YYYY-MM-DD. */
 export function periodRange(preset: string, today = new Date().toISOString().slice(0, 10)): [string, string] {
-  const [y, m] = today.split("-").map(Number);
+  const [y = 2000, m = 1] = today.split("-").map(Number);
   const iso = (yy: number, mm: number, dd: number) => new Date(Date.UTC(yy, mm - 1, dd)).toISOString().slice(0, 10);
   switch (preset) {
     case "this-month": return [iso(y, m, 1), iso(y, m + 1, 0)];
@@ -135,9 +135,9 @@ export const aed = (n: number) => `AED ${n.toLocaleString("en-US", { minimumFrac
 const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
 const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
 function words(n: number): string {
-  if (n < 20) return ones[n];
-  if (n < 100) return `${tens[Math.floor(n / 10)]}${n % 10 ? " " + ones[n % 10] : ""}`;
-  if (n < 1000) return `${ones[Math.floor(n / 100)]} Hundred${n % 100 ? " " + words(n % 100) : ""}`;
+  if (n < 20) return ones[n] ?? "";
+  if (n < 100) return `${tens[Math.floor(n / 10)] ?? ""}${n % 10 ? " " + (ones[n % 10] ?? "") : ""}`;
+  if (n < 1000) return `${ones[Math.floor(n / 100)] ?? ""} Hundred${n % 100 ? " " + words(n % 100) : ""}`;
   for (const [v, w] of [[1e9, "Billion"], [1e6, "Million"], [1e3, "Thousand"]] as const)
     if (n >= v) return `${words(Math.floor(n / v))} ${w}${n % v ? " " + words(n % v) : ""}`;
   return "";
