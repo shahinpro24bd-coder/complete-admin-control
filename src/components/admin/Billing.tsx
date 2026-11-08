@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  aed, amountInWords, docTotals, invoiceTotal, isOverdue, lineAmount, nextNumber, paymentStatus, periodRange, receivedFor,
-  type LineItem, type StatementRow,
+  aed, amountInWords, docTotals, invoiceTotal, isOverdue, lineAmount, nextNumber, paymentStatus, receivedFor,
+  type LineItem,
 } from "@/lib/business";
 import { company } from "@/lib/site";
-import { CustomerList, db, matchCustomer, PeriodSelect, pill, today, useTable, type Row } from "@/components/admin/shared";
+import { CustomerList, db, matchCustomer, pill, today, useTable, type Row } from "@/components/admin/shared";
 
 /* ---------------- Billing settings ---------------- */
 
@@ -37,14 +37,15 @@ export function useSettings() {
 
 const addDays = (d: string, n: number) => new Date(Date.parse(d) + n * 864e5).toISOString().slice(0, 10);
 
-export function BillingSettings() {
-  const { settings, setSettings } = useSettings();
+export function BillingSettings({ settings, setSettings, onClose }: { settings: BillingSettingsData; setSettings: (s: BillingSettingsData) => void; onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const save = async () => {
     setBusy(true);
     const { error } = await db.from("business_settings").upsert({ id: 1, data: settings, updated_at: new Date().toISOString() });
     setBusy(false);
-    if (error) toast.error(error.message); else toast.success("Billing settings saved");
+    if (error) { toast.error(error.message); return; }
+    toast.success("Invoice settings saved");
+    onClose();
   };
   const f = (k: keyof BillingSettingsData, label: string, opts: { type?: string; wide?: boolean; area?: boolean; help?: string } = {}) => (
     <div className={opts.wide || opts.area ? "col-12" : "col-md-4"} key={k}>
@@ -55,18 +56,21 @@ export function BillingSettings() {
     </div>
   );
   return (
-    <div className="bg-white p-4 shadow-sm">
-      <h4>Billing setup</h4>
-      <p className="text-muted">These details print on every quotation, invoice, receipt and statement.</p>
+    <div className="border p-3 mb-4 bg-light">
+      <h5>Invoice settings</h5>
+      <p className="text-muted small">These details print on every invoice.</p>
       <h6 className="mt-4">Company</h6>
       <div className="row g-3">{f("legalName", "Legal company name")}{f("trn", "Company TRN (VAT registration no.)", { help: "When filled, invoices print as TAX INVOICE" })}{f("phone", "Phone")}{f("email", "Email")}{f("address", "Address", { wide: true })}</div>
       <h6 className="mt-4">Bank details (for customers paying by transfer)</h6>
       <div className="row g-3">{f("bankName", "Bank name")}{f("accountName", "Account name")}{f("accountNo", "Account number")}{f("iban", "IBAN")}{f("swift", "SWIFT / BIC")}</div>
       <h6 className="mt-4">Numbers & defaults</h6>
-      <div className="row g-3">{f("invPrefix", "Invoice number prefix")}{f("qtPrefix", "Quotation number prefix")}{f("rcptPrefix", "Receipt number prefix")}
-        {f("vat", "Default VAT %", { type: "number" })}{f("termsDays", "Invoice due after (days)", { type: "number" })}{f("validDays", "Quotation valid for (days)", { type: "number" })}
-        {f("invoiceTerms", "Invoice terms / footer", { area: true })}{f("quoteTerms", "Quotation terms", { area: true })}</div>
-      <button className="btn btn-primary mt-4 px-4" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save billing setup"}</button>
+      <div className="row g-3">{f("invPrefix", "Invoice number prefix")}
+        {f("vat", "Default VAT %", { type: "number" })}{f("termsDays", "Invoice due after (days)", { type: "number" })}
+        {f("invoiceTerms", "Invoice terms / footer", { area: true })}</div>
+      <div className="d-flex gap-2 mt-4">
+        <button className="btn btn-primary btn-sm px-4" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save settings"}</button>
+        <button className="btn btn-light border btn-sm" onClick={onClose}>Close</button>
+      </div>
     </div>
   );
 }
@@ -117,34 +121,12 @@ function docBody(kind: "invoice" | "quotation", d: Row, s: BillingSettingsData, 
 export const printDoc = (kind: "invoice" | "quotation", d: Row, s: BillingSettingsData, received = 0) =>
   printPage(kind === "quotation" ? d.quote_no : d.invoice_no, s, docBody(kind, d, s, received));
 
-export function printReceipt(p: Row, s: BillingSettingsData, invoiceNo?: string) {
-  printPage(p.receipt_no, s, `<h2>PAYMENT RECEIPT</h2>
-  <div class="box"><div><b>Received from:</b> ${esc(p.customer_name)}</div><div class="r"><b>Receipt no:</b> ${esc(p.receipt_no)}<br><b>Date:</b> ${esc(p.payment_date)}</div></div>
-  <table><tr><th>Against</th><th>Method</th><th>Reference</th><th class="r">Amount (AED)</th></tr>
-  <tr><td>${invoiceNo ? "Invoice " + esc(invoiceNo) : "Advance / on account"}</td><td>${esc(p.method)}</td><td>${esc(p.reference ?? "")}${p.cheque_date ? `<br>Cheque date: ${esc(p.cheque_date)}` : ""}</td><td class="r"><b>${money(Number(p.amount))}</b></td></tr></table>
-  <p><b>Amount in words:</b> ${esc(amountInWords(Number(p.amount)))}</p>${p.notes ? `<p>${esc(p.notes)}</p>` : ""}
-  <div class="sign"><div>For ${esc(s.legalName)}</div><div>Customer signature</div></div>`);
-}
-
-export function printStatement(c: Row, rows: StatementRow[], s: BillingSettingsData) {
-  const bal = rows.at(-1)?.balance ?? 0;
-  printPage(`Statement - ${c.name}`, s, `<h2>STATEMENT OF ACCOUNT</h2>
-  <div class="box"><div><b>Customer:</b> ${esc(c.name)}${c.company ? `<br>${esc(c.company)}` : ""}${c.trn ? `<br>TRN: ${esc(c.trn)}` : ""}</div><div class="r"><b>Date:</b> ${today()}</div></div>
-  <table><tr><th>Date</th><th>Ref</th><th>Details</th><th class="r">Invoiced</th><th class="r">Paid</th><th class="r">Balance</th></tr>
-  ${rows.map((r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.ref)}</td><td>${esc(r.text)}</td><td class="r">${r.debit ? money(r.debit) : ""}</td><td class="r">${r.credit ? money(r.credit) : ""}</td><td class="r">${money(r.balance)}</td></tr>`).join("") || `<tr><td colspan="6">No transactions.</td></tr>`}
-  </table><p style="font-size:15px"><b>Balance due: AED ${money(bal)}</b></p>`);
-}
-
 /* ---------------- Quotation / invoice editor ---------------- */
-
-let pendingInvoice: Row | null = null;
-/** Opens the invoice editor pre-filled (from a quotation, AMC contract or job) the next time the Invoices tab mounts. */
-export const queueInvoice = (d: Row) => { pendingInvoice = d; };
 
 const blankLine = (): LineItem => ({ description: "", qty: 1, unit: "", rate: "" });
 
-function DocEditor({ kind, doc, customers, jobs, onClose, onSaved }: {
-  kind: "invoice" | "quotation"; doc: Row; customers: Row[]; jobs: Row[]; onClose: () => void; onSaved: (id: string) => void;
+function DocEditor({ kind, doc, customers, onClose, onSaved }: {
+  kind: "invoice" | "quotation"; doc: Row; customers: Row[]; onClose: () => void; onSaved: (id: string) => void;
 }) {
   const [d, setD] = useState<Row>(() => ({
     ...doc,
@@ -175,7 +157,6 @@ function DocEditor({ kind, doc, customers, jobs, onClose, onSaved }: {
     const res = d.id ? await db.from(table).update(payload).eq("id", d.id).select("id").single() : await db.from(table).insert(payload).select("id").single();
     if (res.error) { toast.error(res.error.message); return; }
     if (kind === "invoice") await syncInvoice(res.data.id);
-    if (kind === "invoice" && d._fromQuote) await db.from("quotations").update({ status: "invoiced", invoice_id: res.data.id }).eq("id", d._fromQuote);
     toast.success("Saved");
     onSaved(res.data.id);
   };
@@ -196,10 +177,6 @@ function DocEditor({ kind, doc, customers, jobs, onClose, onSaved }: {
           <>
             <div className="col-md-3"><label className="form-label small mb-1">Due date</label><input type="date" className="form-control" value={d.due_date ?? ""} onChange={(e) => set({ due_date: e.target.value })} /></div>
             <div className="col-md-4"><label className="form-label small mb-1">LPO / reference no.</label><input className="form-control" value={d.lpo_no ?? ""} onChange={(e) => set({ lpo_no: e.target.value })} /></div>
-            <div className="col-md-8"><label className="form-label small mb-1">For job (optional — used for job profit)</label>
-              <select className="form-select" value={d.job_id ?? ""} onChange={(e) => set({ job_id: e.target.value })}>
-                <option value="">— Not linked to a job —</option>{jobs.map((j) => <option key={j.id} value={j.id}>{j.scheduled_date} {j.title} {j.customer_name ? `(${j.customer_name})` : ""}</option>)}
-              </select></div>
           </>
         ) : (
           <>
@@ -265,58 +242,6 @@ export async function syncInvoice(id: string) {
 
 const statusColors = { paid: "success", partial: "info", unpaid: "warning", cancelled: "secondary", overdue: "danger" };
 
-/* ---------------- Quotations ---------------- */
-
-export function Quotations({ go }: { go: (t: never) => void }) {
-  const t = useTable("quotations", "issue_date");
-  const customers = useTable("customers").rows;
-  const jobs = useTable("jobs", "scheduled_date").rows;
-  const { settings } = useSettings();
-  const [edit, setEdit] = useState<Row | null>(null);
-  const [q, setQ] = useState("");
-  const shown = t.rows.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q.toLowerCase()));
-  const add = () => setEdit({ quote_no: nextNumber(settings.qtPrefix, t.rows.map((r) => r.quote_no)), issue_date: today(), valid_until: addDays(today(), settings.validDays), vat_percent: settings.vat, discount: 0, status: "draft" });
-  const toInvoice = (r: Row) => {
-    queueInvoice({ customer_name: r.customer_name, customer_id: r.customer_id, customer_trn: r.customer_trn, customer_address: r.customer_address, items: r.items, discount: r.discount, vat_percent: r.vat_percent, lpo_no: r.quote_no, notes: r.subject ?? "", _fromQuote: r.id });
-    go("invoices" as never);
-  };
-  const del = async (id: string) => { if (!confirm("Delete this quotation?")) return; const { error } = await db.from("quotations").delete().eq("id", id); if (error) toast.error(error.message); else t.load(); };
-  const setStatus = async (r: Row, status: string) => { await db.from("quotations").update({ status }).eq("id", r.id); t.load(); };
-  const total = (r: Row) => invoiceTotal(r);
-  return (
-    <div className="bg-white p-4 shadow-sm">
-      <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
-        <h4 className="m-0 me-auto">Quotations <small className="text-muted">({t.rows.length})</small></h4>
-        <input className="form-control form-control-sm" style={{ width: 220 }} placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <button className="btn btn-primary btn-sm" onClick={add}><i className="fa fa-plus me-1"></i>New quotation</button>
-      </div>
-      {edit && <DocEditor kind="quotation" doc={edit} customers={customers} jobs={jobs} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); t.load(); }} />}
-      <div className="table-responsive">
-        <table className="table table-hover align-middle small">
-          <thead><tr><th>No.</th><th>Customer</th><th>Date</th><th>Valid until</th><th className="text-end">Total</th><th>Status</th><th></th></tr></thead>
-          <tbody>
-            {shown.length === 0 && <tr><td colSpan={7} className="text-muted">No quotations yet.</td></tr>}
-            {shown.map((r) => (
-              <tr key={r.id}>
-                <td><strong>{r.quote_no}</strong></td><td>{r.customer_name}<small className="d-block text-muted">{r.subject}</small></td><td>{r.issue_date}</td>
-                <td>{r.valid_until}{r.valid_until && r.valid_until < today() && ["draft", "sent"].includes(r.status) && <small className="d-block text-danger">Expired</small>}</td>
-                <td className="text-end">{aed(total(r))}</td>
-                <td><select className="form-select form-select-sm" style={{ width: 120 }} value={r.status} onChange={(e) => setStatus(r, e.target.value)} aria-label="Quotation status">{["draft", "sent", "accepted", "rejected", "invoiced"].map((s) => <option key={s}>{s}</option>)}</select></td>
-                <td className="text-end text-nowrap">
-                  <button className="btn btn-sm btn-outline-dark me-1" onClick={() => printDoc("quotation", r, settings)} aria-label="Print"><i className="fa fa-print"></i></button>
-                  {r.status !== "invoiced" && <button className="btn btn-sm btn-outline-success me-1" onClick={() => toInvoice(r)}><i className="fa fa-file-invoice me-1"></i>Make invoice</button>}
-                  <button className="btn btn-sm btn-outline-primary me-1" onClick={() => setEdit({ ...r })} aria-label="Edit"><i className="fa fa-edit"></i></button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => del(r.id)} aria-label="Delete"><i className="fa fa-trash"></i></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
 /* ---------------- Invoices ---------------- */
 
 const methods = ["cash", "bank transfer", "cheque", "card", "online"];
@@ -358,18 +283,19 @@ function PaymentForm({ invoice, balance, settings, used, customers, onDone }: { 
 export function Invoices() {
   const t = useTable("invoices", "issue_date");
   const pays = useTable("payments", "payment_date");
-  const customers = useTable("customers").rows;
-  const jobs = useTable("jobs", "scheduled_date").rows;
-  const { settings, loaded: settingsLoaded } = useSettings();
+  const { settings, setSettings } = useSettings();
+  const [setup, setSetup] = useState(false);
   const [edit, setEdit] = useState<Row | null>(null);
   const [payFor, setPayFor] = useState<Row | null>(null);
   const [q, setQ] = useState("");
   const [show, setShow] = useState("all");
   const newDoc = (extra: Row = {}) => ({ invoice_no: nextNumber(settings.invPrefix, t.rows.map((r) => r.invoice_no)), issue_date: today(), due_date: addDays(today(), settings.termsDays), vat_percent: settings.vat, discount: 0, notes: "", ...extra });
-
-  useEffect(() => {
-    if (pendingInvoice && t.loaded && settingsLoaded) { const p = pendingInvoice; pendingInvoice = null; setEdit(newDoc(p)); }
-  }, [t.loaded, settingsLoaded]);
+  // Customer suggestions come from earlier invoices (name, TRN, address).
+  const customers = useMemo(() => {
+    const m = new Map<string, Row>();
+    for (const r of t.rows) { const k = r.customer_name?.trim().toLowerCase(); if (k && !m.has(k)) m.set(k, { name: r.customer_name.trim(), trn: r.customer_trn, address: r.customer_address }); }
+    return [...m.values()];
+  }, [t.rows]);
 
   const rows = useMemo(() => t.rows.map((r) => {
     const total = invoiceTotal(r), received = receivedFor(r.id, pays.rows);
@@ -399,14 +325,17 @@ export function Invoices() {
           <option value="all">All</option><option value="open">Not fully paid</option><option value="overdue">Overdue</option><option value="partial">Part paid</option><option value="paid">Paid</option><option value="cancelled">Cancelled</option>
         </select>
         <input className="form-control form-control-sm" style={{ width: 200 }} placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <button className="btn btn-light border btn-sm" onClick={() => setSetup((v) => !v)}><i className="fa fa-cog me-1"></i>Invoice settings</button>
         <button className="btn btn-primary btn-sm" onClick={() => setEdit(newDoc())}><i className="fa fa-plus me-1"></i>New invoice</button>
       </div>
+      {setup && <BillingSettings settings={settings} setSettings={setSettings} onClose={() => setSetup(false)} />}
+      {!setup && !settings.trn && !settings.iban && <div className="alert alert-info small py-2"><i className="fa fa-info-circle me-2"></i>Add your company TRN and bank details in <b>Invoice settings</b> so they print on invoices.</div>}
       <div className="row g-2 mb-3 small">
         {[["Total invoiced", sum.invoiced, ""], ["Received", sum.received, "text-success"], ["Balance due", sum.due, "text-warning"], ["Overdue", sum.overdue, "text-danger"]].map(([l, v, c]) => (
           <div className="col-6 col-md-3" key={l as string}><div className="border p-2 bg-light"><div className="text-muted">{l}</div><strong className={`fs-6 ${c}`}>{aed(v as number)}</strong></div></div>
         ))}
       </div>
-      {edit && <DocEditor kind="invoice" doc={edit} customers={customers} jobs={jobs} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); refresh(); }} />}
+      {edit && <DocEditor kind="invoice" doc={edit} customers={customers} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); refresh(); }} />}
       {payFor && <PaymentForm invoice={payFor} balance={payFor.balance} settings={settings} used={pays.rows.map((p) => p.receipt_no)} customers={customers} onDone={() => { setPayFor(null); refresh(); }} />}
       <div className="table-responsive">
         <table className="table table-hover align-middle small">
@@ -425,66 +354,6 @@ export function Invoices() {
                   <button className="btn btn-sm btn-outline-primary me-1" onClick={() => setEdit({ ...r })} aria-label="Edit"><i className="fa fa-edit"></i></button>
                   <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => voidInv(r)} title={r.st === "cancelled" ? "Restore" : "Cancel invoice"}><i className={`fa ${r.st === "cancelled" ? "fa-undo" : "fa-ban"}`}></i></button>
                   <button className="btn btn-sm btn-outline-danger" onClick={() => del(r)} aria-label="Delete"><i className="fa fa-trash"></i></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-/* ---------------- Payments received ---------------- */
-
-export function Payments() {
-  const t = useTable("payments", "payment_date");
-  const inv = useTable("invoices", "issue_date").rows;
-  const customers = useTable("customers").rows;
-  const { settings } = useSettings();
-  const [period, setPeriod] = useState("this-month");
-  const [adding, setAdding] = useState(false);
-  const [q, setQ] = useState("");
-  const [from, to] = periodRange(period);
-  const invNo = (id?: string) => inv.find((i) => i.id === id)?.invoice_no;
-  const shown = t.rows.filter((p) => p.payment_date >= from && p.payment_date <= to && (!q || JSON.stringify(p).toLowerCase().includes(q.toLowerCase())));
-  const byMethod = shown.reduce<Record<string, number>>((m, p) => ({ ...m, [p.method]: (m[p.method] ?? 0) + Number(p.amount) }), {});
-  const pdc = t.rows.filter((p) => p.method === "cheque" && p.cheque_date && p.cheque_date > today());
-  const del = async (p: Row) => {
-    if (!confirm(`Delete receipt ${p.receipt_no}? The invoice will show as unpaid again.`)) return;
-    const { error } = await db.from("payments").delete().eq("id", p.id);
-    if (error) { toast.error(error.message); return; }
-    if (p.invoice_id) await syncInvoice(p.invoice_id);
-    t.load();
-  };
-  return (
-    <div className="bg-white p-4 shadow-sm">
-      <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
-        <h4 className="m-0 me-auto">Payments received</h4>
-        <PeriodSelect value={period} onChange={setPeriod} />
-        <input className="form-control form-control-sm" style={{ width: 200 }} placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <button className="btn btn-primary btn-sm" onClick={() => setAdding(true)}><i className="fa fa-plus me-1"></i>Other income / advance</button>
-      </div>
-      <p className="small text-muted">To receive money against an invoice, use the <b>Receive</b> button in Invoices — it updates the invoice balance automatically.</p>
-      <div className="d-flex flex-wrap gap-3 mb-3 p-3 bg-light border small">
-        <span>Total received: <strong className="text-success">{aed(shown.reduce((s, p) => s + Number(p.amount), 0))}</strong></span>
-        {Object.entries(byMethod).map(([m, v]) => <span key={m} className="text-capitalize">{m}: {aed(v)}</span>)}
-      </div>
-      {pdc.length > 0 && <div className="alert alert-warning small py-2"><i className="fa fa-money-check me-2"></i><b>Post-dated cheques to deposit:</b> {pdc.map((p) => `${p.customer_name} ${aed(Number(p.amount))} on ${p.cheque_date}`).join(" · ")}</div>}
-      {adding && <PaymentForm settings={settings} used={t.rows.map((p) => p.receipt_no)} customers={customers} onDone={() => { setAdding(false); t.load(); }} />}
-      <div className="table-responsive">
-        <table className="table table-hover align-middle small">
-          <thead><tr><th>Receipt</th><th>Date</th><th>Customer</th><th>Against</th><th>Method</th><th className="text-end">Amount</th><th></th></tr></thead>
-          <tbody>
-            {shown.length === 0 && <tr><td colSpan={7} className="text-muted">No payments in this period.</td></tr>}
-            {shown.map((p) => (
-              <tr key={p.id}>
-                <td><strong>{p.receipt_no}</strong></td><td>{p.payment_date}</td><td>{p.customer_name}</td><td>{invNo(p.invoice_id) ?? <span className="text-muted">Advance / other</span>}</td>
-                <td className="text-capitalize">{p.method}{p.reference && <small className="d-block text-muted">{p.reference}</small>}{p.cheque_date && <small className={`d-block ${p.cheque_date > today() ? "text-warning" : "text-muted"}`}>Cheque date {p.cheque_date}</small>}</td>
-                <td className="text-end fw-bold">{aed(Number(p.amount))}</td>
-                <td className="text-end text-nowrap">
-                  <button className="btn btn-sm btn-outline-dark me-1" onClick={() => printReceipt(p, settings, invNo(p.invoice_id))} aria-label="Print receipt"><i className="fa fa-print"></i></button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => del(p)} aria-label="Delete"><i className="fa fa-trash"></i></button>
                 </td>
               </tr>
             ))}
