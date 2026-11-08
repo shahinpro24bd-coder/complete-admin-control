@@ -37,14 +37,15 @@ export function useSettings() {
 
 const addDays = (d: string, n: number) => new Date(Date.parse(d) + n * 864e5).toISOString().slice(0, 10);
 
-export function BillingSettings() {
-  const { settings, setSettings } = useSettings();
+export function BillingSettings({ settings, setSettings, onClose }: { settings: BillingSettingsData; setSettings: (s: BillingSettingsData) => void; onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const save = async () => {
     setBusy(true);
     const { error } = await db.from("business_settings").upsert({ id: 1, data: settings, updated_at: new Date().toISOString() });
     setBusy(false);
-    if (error) toast.error(error.message); else toast.success("Billing settings saved");
+    if (error) { toast.error(error.message); return; }
+    toast.success("Invoice settings saved");
+    onClose();
   };
   const f = (k: keyof BillingSettingsData, label: string, opts: { type?: string; wide?: boolean; area?: boolean; help?: string } = {}) => (
     <div className={opts.wide || opts.area ? "col-12" : "col-md-4"} key={k}>
@@ -55,18 +56,21 @@ export function BillingSettings() {
     </div>
   );
   return (
-    <div className="bg-white p-4 shadow-sm">
-      <h4>Billing setup</h4>
-      <p className="text-muted">These details print on every quotation, invoice, receipt and statement.</p>
+    <div className="border p-3 mb-4 bg-light">
+      <h5>Invoice settings</h5>
+      <p className="text-muted small">These details print on every invoice.</p>
       <h6 className="mt-4">Company</h6>
       <div className="row g-3">{f("legalName", "Legal company name")}{f("trn", "Company TRN (VAT registration no.)", { help: "When filled, invoices print as TAX INVOICE" })}{f("phone", "Phone")}{f("email", "Email")}{f("address", "Address", { wide: true })}</div>
       <h6 className="mt-4">Bank details (for customers paying by transfer)</h6>
       <div className="row g-3">{f("bankName", "Bank name")}{f("accountName", "Account name")}{f("accountNo", "Account number")}{f("iban", "IBAN")}{f("swift", "SWIFT / BIC")}</div>
       <h6 className="mt-4">Numbers & defaults</h6>
-      <div className="row g-3">{f("invPrefix", "Invoice number prefix")}{f("qtPrefix", "Quotation number prefix")}{f("rcptPrefix", "Receipt number prefix")}
-        {f("vat", "Default VAT %", { type: "number" })}{f("termsDays", "Invoice due after (days)", { type: "number" })}{f("validDays", "Quotation valid for (days)", { type: "number" })}
-        {f("invoiceTerms", "Invoice terms / footer", { area: true })}{f("quoteTerms", "Quotation terms", { area: true })}</div>
-      <button className="btn btn-primary mt-4 px-4" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save billing setup"}</button>
+      <div className="row g-3">{f("invPrefix", "Invoice number prefix")}
+        {f("vat", "Default VAT %", { type: "number" })}{f("termsDays", "Invoice due after (days)", { type: "number" })}
+        {f("invoiceTerms", "Invoice terms / footer", { area: true })}</div>
+      <div className="d-flex gap-2 mt-4">
+        <button className="btn btn-primary btn-sm px-4" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save settings"}</button>
+        <button className="btn btn-light border btn-sm" onClick={onClose}>Close</button>
+      </div>
     </div>
   );
 }
@@ -121,8 +125,8 @@ export const printDoc = (kind: "invoice" | "quotation", d: Row, s: BillingSettin
 
 const blankLine = (): LineItem => ({ description: "", qty: 1, unit: "", rate: "" });
 
-function DocEditor({ kind, doc, customers, jobs, onClose, onSaved }: {
-  kind: "invoice" | "quotation"; doc: Row; customers: Row[]; jobs: Row[]; onClose: () => void; onSaved: (id: string) => void;
+function DocEditor({ kind, doc, customers, onClose, onSaved }: {
+  kind: "invoice" | "quotation"; doc: Row; customers: Row[]; onClose: () => void; onSaved: (id: string) => void;
 }) {
   const [d, setD] = useState<Row>(() => ({
     ...doc,
@@ -153,7 +157,6 @@ function DocEditor({ kind, doc, customers, jobs, onClose, onSaved }: {
     const res = d.id ? await db.from(table).update(payload).eq("id", d.id).select("id").single() : await db.from(table).insert(payload).select("id").single();
     if (res.error) { toast.error(res.error.message); return; }
     if (kind === "invoice") await syncInvoice(res.data.id);
-    if (kind === "invoice" && d._fromQuote) await db.from("quotations").update({ status: "invoiced", invoice_id: res.data.id }).eq("id", d._fromQuote);
     toast.success("Saved");
     onSaved(res.data.id);
   };
@@ -174,10 +177,6 @@ function DocEditor({ kind, doc, customers, jobs, onClose, onSaved }: {
           <>
             <div className="col-md-3"><label className="form-label small mb-1">Due date</label><input type="date" className="form-control" value={d.due_date ?? ""} onChange={(e) => set({ due_date: e.target.value })} /></div>
             <div className="col-md-4"><label className="form-label small mb-1">LPO / reference no.</label><input className="form-control" value={d.lpo_no ?? ""} onChange={(e) => set({ lpo_no: e.target.value })} /></div>
-            <div className="col-md-8"><label className="form-label small mb-1">For job (optional — used for job profit)</label>
-              <select className="form-select" value={d.job_id ?? ""} onChange={(e) => set({ job_id: e.target.value })}>
-                <option value="">— Not linked to a job —</option>{jobs.map((j) => <option key={j.id} value={j.id}>{j.scheduled_date} {j.title} {j.customer_name ? `(${j.customer_name})` : ""}</option>)}
-              </select></div>
           </>
         ) : (
           <>
@@ -284,18 +283,19 @@ function PaymentForm({ invoice, balance, settings, used, customers, onDone }: { 
 export function Invoices() {
   const t = useTable("invoices", "issue_date");
   const pays = useTable("payments", "payment_date");
-  const customers = useTable("customers").rows;
-  const jobs = useTable("jobs", "scheduled_date").rows;
-  const { settings, loaded: settingsLoaded } = useSettings();
+  const { settings, setSettings } = useSettings();
+  const [setup, setSetup] = useState(false);
   const [edit, setEdit] = useState<Row | null>(null);
   const [payFor, setPayFor] = useState<Row | null>(null);
   const [q, setQ] = useState("");
   const [show, setShow] = useState("all");
   const newDoc = (extra: Row = {}) => ({ invoice_no: nextNumber(settings.invPrefix, t.rows.map((r) => r.invoice_no)), issue_date: today(), due_date: addDays(today(), settings.termsDays), vat_percent: settings.vat, discount: 0, notes: "", ...extra });
-
-  useEffect(() => {
-    if (pendingInvoice && t.loaded && settingsLoaded) { const p = pendingInvoice; pendingInvoice = null; setEdit(newDoc(p)); }
-  }, [t.loaded, settingsLoaded]);
+  // Customer suggestions come from earlier invoices (name, TRN, address).
+  const customers = useMemo(() => {
+    const m = new Map<string, Row>();
+    for (const r of t.rows) { const k = r.customer_name?.trim().toLowerCase(); if (k && !m.has(k)) m.set(k, { name: r.customer_name.trim(), trn: r.customer_trn, address: r.customer_address }); }
+    return [...m.values()];
+  }, [t.rows]);
 
   const rows = useMemo(() => t.rows.map((r) => {
     const total = invoiceTotal(r), received = receivedFor(r.id, pays.rows);
@@ -325,14 +325,17 @@ export function Invoices() {
           <option value="all">All</option><option value="open">Not fully paid</option><option value="overdue">Overdue</option><option value="partial">Part paid</option><option value="paid">Paid</option><option value="cancelled">Cancelled</option>
         </select>
         <input className="form-control form-control-sm" style={{ width: 200 }} placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <button className="btn btn-light border btn-sm" onClick={() => setSetup((v) => !v)}><i className="fa fa-cog me-1"></i>Invoice settings</button>
         <button className="btn btn-primary btn-sm" onClick={() => setEdit(newDoc())}><i className="fa fa-plus me-1"></i>New invoice</button>
       </div>
+      {setup && <BillingSettings settings={settings} setSettings={setSettings} onClose={() => setSetup(false)} />}
+      {!setup && !settings.trn && !settings.iban && <div className="alert alert-info small py-2"><i className="fa fa-info-circle me-2"></i>Add your company TRN and bank details in <b>Invoice settings</b> so they print on invoices.</div>}
       <div className="row g-2 mb-3 small">
         {[["Total invoiced", sum.invoiced, ""], ["Received", sum.received, "text-success"], ["Balance due", sum.due, "text-warning"], ["Overdue", sum.overdue, "text-danger"]].map(([l, v, c]) => (
           <div className="col-6 col-md-3" key={l as string}><div className="border p-2 bg-light"><div className="text-muted">{l}</div><strong className={`fs-6 ${c}`}>{aed(v as number)}</strong></div></div>
         ))}
       </div>
-      {edit && <DocEditor kind="invoice" doc={edit} customers={customers} jobs={jobs} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); refresh(); }} />}
+      {edit && <DocEditor kind="invoice" doc={edit} customers={customers} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); refresh(); }} />}
       {payFor && <PaymentForm invoice={payFor} balance={payFor.balance} settings={settings} used={pays.rows.map((p) => p.receipt_no)} customers={customers} onDone={() => { setPayFor(null); refresh(); }} />}
       <div className="table-responsive">
         <table className="table table-hover align-middle small">

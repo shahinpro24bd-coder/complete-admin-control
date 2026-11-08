@@ -6,7 +6,7 @@ import { defaults, makeSlug, mergeServices, type CmsCompany, type CmsFaq, type C
 import { seoDefaults } from "@/lib/seo";
 import { IconPicker } from "@/components/admin/IconPicker";
 import type { Tables } from "@/integrations/supabase/types";
-import { Customers, Contracts, Jobs, Invoices, Quotations, Payments, Expenses, Accounts, BillingSettings } from "@/components/admin/Business";
+import { Invoices } from "@/components/admin/Billing";
 import { services as siteServices } from "@/lib/site";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "company" | "services" | "faqs" | "seo" | "quotes" | "account" | "customers" | "amc" | "jobs" | "invoices" | "reports" | "quotations" | "payments" | "expenses" | "billing";
+type Tab = "dashboard" | "company" | "services" | "faqs" | "seo" | "quotes" | "account" | "invoices";
 
 const getSitePages = () => [
   { key: "home", name: "Home", path: "/", icon: "fa-home", desc: "Hero slides, about, services, process, FAQ", edit: true },
@@ -132,10 +132,6 @@ function AdminPage() {
     setQuotes((q) => q.map((x) => (x.id === id ? { ...x, ...patch } : x)));
     toast.success("Updated");
   };
-  const saveCustomer = async (q: Tables<"quote_requests">) => {
-    const { error } = await supabase.from("customers").insert({ name: q.name, company: q.company, phone: q.phone, email: q.email, address: q.location, notes: `From quote: ${q.service}` });
-    if (error) toast.error(error.message); else toast.success("Added to customers");
-  };
   const setQuoteStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("quote_requests").update({ status }).eq("id", id);
     if (error) { toast.error(error.message); return; }
@@ -157,15 +153,7 @@ function AdminPage() {
   const tabs: [Tab, string, string][] = [
     ["dashboard", "Dashboard", "fa-th-large"],
     ["quotes", `Quote Requests${newCount ? ` (${newCount})` : ""}`, "fa-inbox"],
-    ["customers", "Customers", "fa-users"],
-    ["amc", "AMC Contracts", "fa-file-contract"],
-    ["jobs", "Jobs", "fa-wrench"],
-    ["quotations", "Quotations", "fa-file-signature"],
     ["invoices", "Invoices", "fa-file-invoice-dollar"],
-    ["payments", "Payments In", "fa-hand-holding-usd"],
-    ["expenses", "Expenses", "fa-receipt"],
-    ["reports", "Accounts", "fa-chart-bar"],
-    ["billing", "Billing Setup", "fa-cog"],
     ["company", "Contact Info", "fa-building"],
     ["services", "Services", "fa-tools"],
     ["faqs", "FAQs", "fa-question-circle"],
@@ -197,15 +185,7 @@ function AdminPage() {
         {tab === "dashboard" && <Dashboard quotes={quotes} newCount={newCount} servicesCount={services.length} faqCount={faqs.length} go={setTab} />}
 
         {tab === "account" && <Account />}
-        {tab === "customers" && <Customers />}
-        {tab === "amc" && <Contracts go={setTab as never} />}
-        {tab === "jobs" && <Jobs go={setTab as never} />}
-        {tab === "quotations" && <Quotations go={setTab as never} />}
         {tab === "invoices" && <Invoices />}
-        {tab === "payments" && <Payments />}
-        {tab === "expenses" && <Expenses />}
-        {tab === "reports" && <Accounts />}
-        {tab === "billing" && <BillingSettings />}
 
         {tab === "company" && (
           <div className="bg-white p-4 shadow-sm">
@@ -333,7 +313,6 @@ function AdminPage() {
                   <select className="form-select form-select-sm" style={{ width: 160 }} value={q.status} onChange={(e) => setQuoteStatus(q.id, e.target.value)}>
                     <option value="new">New</option><option value="contacted">Contacted</option><option value="quoted">Quoted</option><option value="won">Won</option><option value="lost">Lost</option><option value="done">Done</option>
                   </select>
-                  <button className="btn btn-sm btn-outline-primary" onClick={() => saveCustomer(q)}><i className="fa fa-user-plus me-1"></i>Save as customer</button>
                   <button className="btn btn-sm btn-outline-danger" onClick={() => deleteQuote(q.id)}>Delete</button>
                 </div>
               </div>

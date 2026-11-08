@@ -29,7 +29,7 @@ export const belongsTo = (c: Row, r: Row) =>
   r.customer_id === c.id || (!r.customer_id && r.customer_name?.trim().toLowerCase() === c.name?.trim().toLowerCase());
 
 export function CustomerList({ customers }: { customers: Row[] }) {
-  return <datalist id="cust-list">{customers.map((c) => <option key={c.id} value={c.name}>{c.company ?? ""}</option>)}</datalist>;
+  return <datalist id="cust-list">{customers.map((c) => <option key={c.id ?? c.name} value={c.name}>{c.company ?? ""}</option>)}</datalist>;
 }
 
 export const pill = (s: string, map: Record<string, string>) => <span className={`badge bg-${map[s] ?? "secondary"} text-capitalize`}>{s}</span>;
