@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  aed, amountInWords, docTotals, invoiceTotal, isOverdue, lineAmount, nextNumber, paymentStatus, periodRange, receivedFor,
-  type LineItem, type StatementRow,
+  aed, amountInWords, docTotals, invoiceTotal, isOverdue, lineAmount, nextNumber, paymentStatus, receivedFor,
+  type LineItem,
 } from "@/lib/business";
 import { company } from "@/lib/site";
-import { CustomerList, db, matchCustomer, PeriodSelect, pill, today, useTable, type Row } from "@/components/admin/shared";
+import { CustomerList, db, matchCustomer, pill, today, useTable, type Row } from "@/components/admin/shared";
 
 /* ---------------- Billing settings ---------------- */
 
@@ -117,29 +117,7 @@ function docBody(kind: "invoice" | "quotation", d: Row, s: BillingSettingsData, 
 export const printDoc = (kind: "invoice" | "quotation", d: Row, s: BillingSettingsData, received = 0) =>
   printPage(kind === "quotation" ? d.quote_no : d.invoice_no, s, docBody(kind, d, s, received));
 
-export function printReceipt(p: Row, s: BillingSettingsData, invoiceNo?: string) {
-  printPage(p.receipt_no, s, `<h2>PAYMENT RECEIPT</h2>
-  <div class="box"><div><b>Received from:</b> ${esc(p.customer_name)}</div><div class="r"><b>Receipt no:</b> ${esc(p.receipt_no)}<br><b>Date:</b> ${esc(p.payment_date)}</div></div>
-  <table><tr><th>Against</th><th>Method</th><th>Reference</th><th class="r">Amount (AED)</th></tr>
-  <tr><td>${invoiceNo ? "Invoice " + esc(invoiceNo) : "Advance / on account"}</td><td>${esc(p.method)}</td><td>${esc(p.reference ?? "")}${p.cheque_date ? `<br>Cheque date: ${esc(p.cheque_date)}` : ""}</td><td class="r"><b>${money(Number(p.amount))}</b></td></tr></table>
-  <p><b>Amount in words:</b> ${esc(amountInWords(Number(p.amount)))}</p>${p.notes ? `<p>${esc(p.notes)}</p>` : ""}
-  <div class="sign"><div>For ${esc(s.legalName)}</div><div>Customer signature</div></div>`);
-}
-
-export function printStatement(c: Row, rows: StatementRow[], s: BillingSettingsData) {
-  const bal = rows.at(-1)?.balance ?? 0;
-  printPage(`Statement - ${c.name}`, s, `<h2>STATEMENT OF ACCOUNT</h2>
-  <div class="box"><div><b>Customer:</b> ${esc(c.name)}${c.company ? `<br>${esc(c.company)}` : ""}${c.trn ? `<br>TRN: ${esc(c.trn)}` : ""}</div><div class="r"><b>Date:</b> ${today()}</div></div>
-  <table><tr><th>Date</th><th>Ref</th><th>Details</th><th class="r">Invoiced</th><th class="r">Paid</th><th class="r">Balance</th></tr>
-  ${rows.map((r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.ref)}</td><td>${esc(r.text)}</td><td class="r">${r.debit ? money(r.debit) : ""}</td><td class="r">${r.credit ? money(r.credit) : ""}</td><td class="r">${money(r.balance)}</td></tr>`).join("") || `<tr><td colspan="6">No transactions.</td></tr>`}
-  </table><p style="font-size:15px"><b>Balance due: AED ${money(bal)}</b></p>`);
-}
-
 /* ---------------- Quotation / invoice editor ---------------- */
-
-let pendingInvoice: Row | null = null;
-/** Opens the invoice editor pre-filled (from a quotation, AMC contract or job) the next time the Invoices tab mounts. */
-export const queueInvoice = (d: Row) => { pendingInvoice = d; };
 
 const blankLine = (): LineItem => ({ description: "", qty: 1, unit: "", rate: "" });
 
@@ -265,58 +243,6 @@ export async function syncInvoice(id: string) {
 
 const statusColors = { paid: "success", partial: "info", unpaid: "warning", cancelled: "secondary", overdue: "danger" };
 
-/* ---------------- Quotations ---------------- */
-
-export function Quotations({ go }: { go: (t: never) => void }) {
-  const t = useTable("quotations", "issue_date");
-  const customers = useTable("customers").rows;
-  const jobs = useTable("jobs", "scheduled_date").rows;
-  const { settings } = useSettings();
-  const [edit, setEdit] = useState<Row | null>(null);
-  const [q, setQ] = useState("");
-  const shown = t.rows.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q.toLowerCase()));
-  const add = () => setEdit({ quote_no: nextNumber(settings.qtPrefix, t.rows.map((r) => r.quote_no)), issue_date: today(), valid_until: addDays(today(), settings.validDays), vat_percent: settings.vat, discount: 0, status: "draft" });
-  const toInvoice = (r: Row) => {
-    queueInvoice({ customer_name: r.customer_name, customer_id: r.customer_id, customer_trn: r.customer_trn, customer_address: r.customer_address, items: r.items, discount: r.discount, vat_percent: r.vat_percent, lpo_no: r.quote_no, notes: r.subject ?? "", _fromQuote: r.id });
-    go("invoices" as never);
-  };
-  const del = async (id: string) => { if (!confirm("Delete this quotation?")) return; const { error } = await db.from("quotations").delete().eq("id", id); if (error) toast.error(error.message); else t.load(); };
-  const setStatus = async (r: Row, status: string) => { await db.from("quotations").update({ status }).eq("id", r.id); t.load(); };
-  const total = (r: Row) => invoiceTotal(r);
-  return (
-    <div className="bg-white p-4 shadow-sm">
-      <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
-        <h4 className="m-0 me-auto">Quotations <small className="text-muted">({t.rows.length})</small></h4>
-        <input className="form-control form-control-sm" style={{ width: 220 }} placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <button className="btn btn-primary btn-sm" onClick={add}><i className="fa fa-plus me-1"></i>New quotation</button>
-      </div>
-      {edit && <DocEditor kind="quotation" doc={edit} customers={customers} jobs={jobs} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); t.load(); }} />}
-      <div className="table-responsive">
-        <table className="table table-hover align-middle small">
-          <thead><tr><th>No.</th><th>Customer</th><th>Date</th><th>Valid until</th><th className="text-end">Total</th><th>Status</th><th></th></tr></thead>
-          <tbody>
-            {shown.length === 0 && <tr><td colSpan={7} className="text-muted">No quotations yet.</td></tr>}
-            {shown.map((r) => (
-              <tr key={r.id}>
-                <td><strong>{r.quote_no}</strong></td><td>{r.customer_name}<small className="d-block text-muted">{r.subject}</small></td><td>{r.issue_date}</td>
-                <td>{r.valid_until}{r.valid_until && r.valid_until < today() && ["draft", "sent"].includes(r.status) && <small className="d-block text-danger">Expired</small>}</td>
-                <td className="text-end">{aed(total(r))}</td>
-                <td><select className="form-select form-select-sm" style={{ width: 120 }} value={r.status} onChange={(e) => setStatus(r, e.target.value)} aria-label="Quotation status">{["draft", "sent", "accepted", "rejected", "invoiced"].map((s) => <option key={s}>{s}</option>)}</select></td>
-                <td className="text-end text-nowrap">
-                  <button className="btn btn-sm btn-outline-dark me-1" onClick={() => printDoc("quotation", r, settings)} aria-label="Print"><i className="fa fa-print"></i></button>
-                  {r.status !== "invoiced" && <button className="btn btn-sm btn-outline-success me-1" onClick={() => toInvoice(r)}><i className="fa fa-file-invoice me-1"></i>Make invoice</button>}
-                  <button className="btn btn-sm btn-outline-primary me-1" onClick={() => setEdit({ ...r })} aria-label="Edit"><i className="fa fa-edit"></i></button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => del(r.id)} aria-label="Delete"><i className="fa fa-trash"></i></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
 /* ---------------- Invoices ---------------- */
 
 const methods = ["cash", "bank transfer", "cheque", "card", "online"];
@@ -425,66 +351,6 @@ export function Invoices() {
                   <button className="btn btn-sm btn-outline-primary me-1" onClick={() => setEdit({ ...r })} aria-label="Edit"><i className="fa fa-edit"></i></button>
                   <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => voidInv(r)} title={r.st === "cancelled" ? "Restore" : "Cancel invoice"}><i className={`fa ${r.st === "cancelled" ? "fa-undo" : "fa-ban"}`}></i></button>
                   <button className="btn btn-sm btn-outline-danger" onClick={() => del(r)} aria-label="Delete"><i className="fa fa-trash"></i></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-/* ---------------- Payments received ---------------- */
-
-export function Payments() {
-  const t = useTable("payments", "payment_date");
-  const inv = useTable("invoices", "issue_date").rows;
-  const customers = useTable("customers").rows;
-  const { settings } = useSettings();
-  const [period, setPeriod] = useState("this-month");
-  const [adding, setAdding] = useState(false);
-  const [q, setQ] = useState("");
-  const [from, to] = periodRange(period);
-  const invNo = (id?: string) => inv.find((i) => i.id === id)?.invoice_no;
-  const shown = t.rows.filter((p) => p.payment_date >= from && p.payment_date <= to && (!q || JSON.stringify(p).toLowerCase().includes(q.toLowerCase())));
-  const byMethod = shown.reduce<Record<string, number>>((m, p) => ({ ...m, [p.method]: (m[p.method] ?? 0) + Number(p.amount) }), {});
-  const pdc = t.rows.filter((p) => p.method === "cheque" && p.cheque_date && p.cheque_date > today());
-  const del = async (p: Row) => {
-    if (!confirm(`Delete receipt ${p.receipt_no}? The invoice will show as unpaid again.`)) return;
-    const { error } = await db.from("payments").delete().eq("id", p.id);
-    if (error) { toast.error(error.message); return; }
-    if (p.invoice_id) await syncInvoice(p.invoice_id);
-    t.load();
-  };
-  return (
-    <div className="bg-white p-4 shadow-sm">
-      <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
-        <h4 className="m-0 me-auto">Payments received</h4>
-        <PeriodSelect value={period} onChange={setPeriod} />
-        <input className="form-control form-control-sm" style={{ width: 200 }} placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <button className="btn btn-primary btn-sm" onClick={() => setAdding(true)}><i className="fa fa-plus me-1"></i>Other income / advance</button>
-      </div>
-      <p className="small text-muted">To receive money against an invoice, use the <b>Receive</b> button in Invoices — it updates the invoice balance automatically.</p>
-      <div className="d-flex flex-wrap gap-3 mb-3 p-3 bg-light border small">
-        <span>Total received: <strong className="text-success">{aed(shown.reduce((s, p) => s + Number(p.amount), 0))}</strong></span>
-        {Object.entries(byMethod).map(([m, v]) => <span key={m} className="text-capitalize">{m}: {aed(v)}</span>)}
-      </div>
-      {pdc.length > 0 && <div className="alert alert-warning small py-2"><i className="fa fa-money-check me-2"></i><b>Post-dated cheques to deposit:</b> {pdc.map((p) => `${p.customer_name} ${aed(Number(p.amount))} on ${p.cheque_date}`).join(" · ")}</div>}
-      {adding && <PaymentForm settings={settings} used={t.rows.map((p) => p.receipt_no)} customers={customers} onDone={() => { setAdding(false); t.load(); }} />}
-      <div className="table-responsive">
-        <table className="table table-hover align-middle small">
-          <thead><tr><th>Receipt</th><th>Date</th><th>Customer</th><th>Against</th><th>Method</th><th className="text-end">Amount</th><th></th></tr></thead>
-          <tbody>
-            {shown.length === 0 && <tr><td colSpan={7} className="text-muted">No payments in this period.</td></tr>}
-            {shown.map((p) => (
-              <tr key={p.id}>
-                <td><strong>{p.receipt_no}</strong></td><td>{p.payment_date}</td><td>{p.customer_name}</td><td>{invNo(p.invoice_id) ?? <span className="text-muted">Advance / other</span>}</td>
-                <td className="text-capitalize">{p.method}{p.reference && <small className="d-block text-muted">{p.reference}</small>}{p.cheque_date && <small className={`d-block ${p.cheque_date > today() ? "text-warning" : "text-muted"}`}>Cheque date {p.cheque_date}</small>}</td>
-                <td className="text-end fw-bold">{aed(Number(p.amount))}</td>
-                <td className="text-end text-nowrap">
-                  <button className="btn btn-sm btn-outline-dark me-1" onClick={() => printReceipt(p, settings, invNo(p.invoice_id))} aria-label="Print receipt"><i className="fa fa-print"></i></button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => del(p)} aria-label="Delete"><i className="fa fa-trash"></i></button>
                 </td>
               </tr>
             ))}
