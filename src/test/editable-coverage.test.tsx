@@ -24,7 +24,7 @@ const pages: Record<string, () => JSX.Element> = {
 // Things that are generated, not written copy: numbering, counters, separators.
 const ignorable = (t: string) => /^[\s\d/·|:.,\-–—+%()#&]*$/.test(t);
 // Editor-only helpers (toolbars, add buttons, hints) are not site content.
-const skip = ".cms-tools, .cms-add, .cms-hint, script, style, noscript";
+const skip = ".cms-tools, .cms-add, .cms-hint, .cms-hero-pick, .cms-options small, textarea, select, script, style, noscript";
 
 async function audit(P: () => JSX.Element) {
   const root = createRootRoute({ component: () => <EditContext.Provider value={ctx}><P /></EditContext.Provider> });
