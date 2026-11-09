@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type JSX } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { defaults, mergeServices, type CmsCompany, type CmsFaq, type CmsService } from "@/lib/cms";
+import { defaults, mergeServices, withPhone, type CmsCompany, type CmsFaq, type CmsService } from "@/lib/cms";
 import { EditContext } from "@/lib/editable";
 import { SiteLayout } from "@/components/site/Layout";
 import { HomeContent } from "@/components/site/HomeContent";
@@ -50,13 +50,6 @@ const svcRe = /^services\.(\d+)\.(title|summary|cta|image|icon)$/;
 const itemRe = /^services\.(\d+)\.items\.(\d+)$/;
 const faqRe = /^faqs\.(\d+)\.(q|a)$/;
 const coRe = /^company\.(\w+)$/;
-
-/** Typing a new phone number also updates the call and WhatsApp links. */
-export function withPhone(co: CmsCompany, phone: string): CmsCompany {
-  const digits = phone.replace(/[^\d+]/g, "");
-  if (!digits.replace("+", "")) return { ...co, phone };
-  return { ...co, phone, phoneHref: `tel:${digits}`, whatsappHref: `https://wa.me/${digits.replace(/^\+/, "")}` };
-}
 
 function PageEditor() {
   const { page } = Route.useParams();

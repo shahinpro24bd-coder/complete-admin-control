@@ -46,6 +46,13 @@ export function applyContent(c: SiteContent | null | undefined) {
   setPageTexts(c?.texts);
 }
 
+/** Typing a new phone number also updates the call and WhatsApp links. */
+export function withPhone(co: CmsCompany, phone: string): CmsCompany {
+  const digits = phone.replace(/[^\d+]/g, "");
+  if (!digits.replace("+", "")) return { ...co, phone };
+  return { ...co, phone, phoneHref: `tel:${digits}`, whatsappHref: `https://wa.me/${digits.replace(/^\+/, "")}` };
+}
+
 /** URL-safe id for a new service page, unique among existing slugs. */
 export function makeSlug(title: string, taken: string[]) {
   const base = title.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "service";

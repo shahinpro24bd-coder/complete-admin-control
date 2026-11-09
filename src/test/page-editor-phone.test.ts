@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { withPhone } from "@/routes/_authenticated/admin_.pages.$page";
-import { defaults } from "@/lib/cms";
+import { defaults, withPhone } from "@/lib/cms";
 
 describe("changing the phone number on a page", () => {
   it("also updates the call and WhatsApp links", () => {
