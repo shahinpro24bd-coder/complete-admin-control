@@ -1,5 +1,6 @@
 import { company, services, faqs, type Service } from "@/lib/site";
 import { setPageTexts } from "@/lib/editable";
+import { resolveImg } from "@/lib/images";
 
 export type CmsCompany = typeof company;
 export type CmsService = { slug: string; title: string; summary: string; items: string[]; cta: string; image: string; icon: string };

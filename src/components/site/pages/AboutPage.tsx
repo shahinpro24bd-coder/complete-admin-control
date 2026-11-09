@@ -52,7 +52,7 @@ const values = [
 export function AboutPage() {
   const c = useEditable();
   const commitRaw = c.get("about.commit.image", about2);
-  const commitImg = commitRaw && !commitRaw.startsWith("/assets/") ? commitRaw : about2;
+  const commitImg = safeImg(commitRaw, about2);
   const pillarList = useList("about.pillar", pillars);
   const valueList = useList("about.value", values);
   const stepList = useList("about.step", approach);

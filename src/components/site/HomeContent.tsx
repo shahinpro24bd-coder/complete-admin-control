@@ -80,7 +80,7 @@ export function HomeContent() {
       {/* Hero */}
       <section className="hero">
         {slides.ids.map((id, n) => (
-          <img key={id} data-cms-img={edit ? "slide" : undefined} className={`hero-bg ${n === i ? "is-active" : ""}`} src={get(`home.hero.${id}.img`, slides.def(id).img)} alt="" loading="eager" decoding="async" width={1920} height={1088} />
+          <img key={id} data-cms-img={edit ? "slide" : undefined} className={`hero-bg ${n === i ? "is-active" : ""}`} src={safeImg(get(`home.hero.${id}.img`, slides.def(id).img), slides.def(id).img)} alt="" loading="eager" decoding="async" width={1920} height={1088} />
         ))}
         <div className="hero-overlay" />
         <div className="container hero-content">

@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { uploadSiteImage } from "@/lib/upload-image";
+import { resolveImg } from "@/lib/images";
 import { defaults, makeSlug, mergeServices, type CmsCompany, type CmsFaq, type CmsService } from "@/lib/cms";
 import { seoDefaults } from "@/lib/seo";
 import { IconPicker } from "@/components/admin/IconPicker";
@@ -219,7 +220,7 @@ function AdminPage() {
                   </div>
                   <div className="row g-4">
                     <div className="col-md-3">
-                      <img src={s.image} alt={s.title} className="w-100 mb-2" style={{ aspectRatio: "4/3", objectFit: "cover" }} />
+                      <img src={resolveImg(s.image, s.image)} alt={s.title} className="w-100 mb-2" style={{ aspectRatio: "4/3", objectFit: "cover" }} />
                       <label className="btn btn-outline-primary btn-sm w-100 mb-2">
                         <i className="fa fa-upload me-1"></i>Change image
                         <input type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && upload(i, e.target.files[0])} />
