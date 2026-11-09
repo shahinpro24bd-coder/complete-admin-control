@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import hero3Asset from "@/assets/hero-3.webp.asset.json";
+import hero3Asset from "@/assets/hero-3.webp";
 import { services } from "@/lib/site";
 import { PageHeader, SectionTitle } from "@/components/site/Layout";
 import { CtaBanner } from "@/components/site/Sections";
@@ -30,7 +30,7 @@ export function ProjectsPage() {
   const shown = c.edit || !filter ? cards : cards.filter((x) => x.sector.trim() === filter);
   return (
     <>
-      <PageHeader k="projects" title="Projects" crumb="Projects" image={hero3Asset.url} />
+      <PageHeader k="projects" title="Projects" crumb="Projects" image={hero3Asset} />
       <div className="band py-5">
         <div className="container">
           <SectionTitle k="projects.intro" kicker="Our Projects" title="Demonstrating Our Work Through Real Projects" />

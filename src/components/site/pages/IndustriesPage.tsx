@@ -1,27 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import buildingsAsset from "@/assets/buildings.webp.asset.json";
-import imgResAsset from "@/assets/about-1.webp.asset.json";
-import imgComAsset from "@/assets/hero-2.webp.asset.json";
-import imgFitAsset from "@/assets/about-2.webp.asset.json";
-import imgFmAsset from "@/assets/service-maintenance.webp.asset.json";
-import imgMcAsset from "@/assets/hero-3.webp.asset.json";
+import buildingsAsset from "@/assets/buildings.webp";
+import imgResAsset from "@/assets/about-1.webp";
+import imgComAsset from "@/assets/hero-2.webp";
+import imgFitAsset from "@/assets/about-2.webp";
+import imgFmAsset from "@/assets/service-maintenance.webp";
+import imgMcAsset from "@/assets/hero-3.webp";
 import { PageHeader } from "@/components/site/Layout";
 import { CtaBanner } from "@/components/site/Sections";
 import { T, Img, Icon, useList, ItemTools, AddItem } from "@/lib/editable";
 
 const list = [
-  { img: imgResAsset.url, tag: "Villas · Apartments", icon: "fa-home", title: "Residential Properties", text: "Maintenance and repair support for villas, apartments, and residential buildings." },
-  { img: imgComAsset.url, tag: "Offices · Retail", icon: "fa-building", title: "Commercial Buildings", text: "MEP services for offices, retail spaces, and commercial facilities." },
-  { img: imgFitAsset.url, tag: "Interiors · Coordination", icon: "fa-drafting-compass", title: "Fit-Out Projects", text: "Coordination and technical support for electromechanical requirements within fit-out projects." },
-  { img: imgFmAsset.url, tag: "Service Scopes · AMC", icon: "fa-clipboard-list", title: "Property & Facility Management", text: "Maintenance support aligned with agreed service scopes and property requirements." },
-  { img: imgMcAsset.url, tag: "Specs · Schedules", icon: "fa-hard-hat", title: "Main Contractors", text: "MEP project support based on technical specifications, project schedules, and contractual requirements." },
+  { img: imgResAsset, tag: "Villas · Apartments", icon: "fa-home", title: "Residential Properties", text: "Maintenance and repair support for villas, apartments, and residential buildings." },
+  { img: imgComAsset, tag: "Offices · Retail", icon: "fa-building", title: "Commercial Buildings", text: "MEP services for offices, retail spaces, and commercial facilities." },
+  { img: imgFitAsset, tag: "Interiors · Coordination", icon: "fa-drafting-compass", title: "Fit-Out Projects", text: "Coordination and technical support for electromechanical requirements within fit-out projects." },
+  { img: imgFmAsset, tag: "Service Scopes · AMC", icon: "fa-clipboard-list", title: "Property & Facility Management", text: "Maintenance support aligned with agreed service scopes and property requirements." },
+  { img: imgMcAsset, tag: "Specs · Schedules", icon: "fa-hard-hat", title: "Main Contractors", text: "MEP project support based on technical specifications, project schedules, and contractual requirements." },
 ];
 
 export function IndustriesPage() {
   const items = useList("ind", list);
   return (
     <>
-      <PageHeader k="industries" title="Industries" crumb="Industries We Serve" image={buildingsAsset.url} />
+      <PageHeader k="industries" title="Industries" crumb="Industries We Serve" image={buildingsAsset} />
       <section className="ind-section">
         <span className="ind-grid-bg" aria-hidden="true" />
         <div className="container position-relative">

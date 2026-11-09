@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import amcImgAsset from "@/assets/service-amc.webp.asset.json";
+import amcImgAsset from "@/assets/service-amc.webp";
 import { PageHeader, SectionTitle } from "@/components/site/Layout";
 import { CtaBanner } from "@/components/site/Sections";
 import { T, Icon, useList, ItemTools, AddItem } from "@/lib/editable";
@@ -50,7 +50,7 @@ export function AmcPage() {
   const list = useList("amc.plan", plans);
   return (
     <>
-      <PageHeader k="amc" title="AMC Packages" crumb="AMC Packages" image={amcImgAsset.url} />
+      <PageHeader k="amc" title="AMC Packages" crumb="AMC Packages" image={amcImgAsset} />
       <div className="band py-5">
         <div className="container">
           <SectionTitle k="amc.intro" kicker="Annual Maintenance Contracts" title="Planned Maintenance For Long-Term Property Care" />

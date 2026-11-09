@@ -1,15 +1,15 @@
-import hvacAsset from "@/assets/service-hvac.webp.asset.json";
-const hvac = hvacAsset.url;
-import electricalAsset from "@/assets/service-electrical.webp.asset.json";
-const electrical = electricalAsset.url;
-import plumbingAsset from "@/assets/service-plumbing.webp.asset.json";
-const plumbing = plumbingAsset.url;
-import maintenanceAsset from "@/assets/service-maintenance.webp.asset.json";
-const maintenance = maintenanceAsset.url;
-import amcAsset from "@/assets/service-amc.webp.asset.json";
-const amc = amcAsset.url;
-import vrfAsset from "@/assets/service-vrf.webp.asset.json";
-const vrf = vrfAsset.url;
+import hvacAsset from "@/assets/service-hvac.webp";
+const hvac = hvacAsset;
+import electricalAsset from "@/assets/service-electrical.webp";
+const electrical = electricalAsset;
+import plumbingAsset from "@/assets/service-plumbing.webp";
+const plumbing = plumbingAsset;
+import maintenanceAsset from "@/assets/service-maintenance.webp";
+const maintenance = maintenanceAsset;
+import amcAsset from "@/assets/service-amc.webp";
+const amc = amcAsset;
+import vrfAsset from "@/assets/service-vrf.webp";
+const vrf = vrfAsset;
 
 // Contact details are placeholders until QMEP confirms official values.
 export const company = {
