@@ -31,7 +31,7 @@ export function mergeServices(saved: Partial<CmsService>[] | null | undefined): 
       summary: sv.summary ?? base?.summary ?? "",
       cta: sv.cta || base?.cta || "Request a Quote",
       icon: sv.icon || base?.icon || "fa-tools",
-      image: sv.image && !sv.image.startsWith("/assets/") ? sv.image : fallbackImg,
+      image: resolveImg(sv.image, fallbackImg),
       items: sv.items?.filter((x) => x.trim()).length ? sv.items.filter((x) => x.trim()) : base?.items ?? [],
     });
   }
