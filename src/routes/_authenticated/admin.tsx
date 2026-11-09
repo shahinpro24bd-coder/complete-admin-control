@@ -111,11 +111,9 @@ function AdminPage() {
   };
 
   const upload = async (idx: number, file: File) => {
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const name = `${services[idx]!.slug}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("site-images").upload(name, file, { contentType: file.type, cacheControl: "31536000" });
-    if (error) { toast.error("Upload failed: " + error.message); return; }
-    setServices((s) => s.map((x, i) => (i === idx ? { ...x, image: `/api/public/img/${name}` } : x)));
+    const { url, error } = await uploadSiteImage(file, services[idx]!.slug);
+    if (error || !url) { toast.error("Upload failed: " + error); return; }
+    setServices((s) => s.map((x, i) => (i === idx ? { ...x, image: url } : x)));
     touch();
     toast.success("Image uploaded — click Save to publish.");
   };

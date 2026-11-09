@@ -138,12 +138,10 @@ function PageEditor() {
     const k = pickKey.current;
     if (!k) return;
     setUploading(true);
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const name = `${k.replace(/[^\w-]/g, "-")}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("site-images").upload(name, file, { contentType: file.type, cacheControl: "31536000" });
+    const { url, error } = await uploadSiteImage(file, k);
     setUploading(false);
-    if (error) { toast.error("Upload failed: " + error.message); return; }
-    ctx.set(k, `/api/public/img/${name}`);
+    if (error || !url) { toast.error("Upload failed: " + error); return; }
+    ctx.set(k, url);
     toast.success("Image changed — click Save to publish.");
   };
 
