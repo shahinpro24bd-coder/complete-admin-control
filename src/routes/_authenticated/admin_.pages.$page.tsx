@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type JSX } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { uploadSiteImage } from "@/lib/upload-image";
 import { defaults, mergeServices, withPhone, type CmsCompany, type CmsFaq, type CmsService } from "@/lib/cms";
 import { EditContext } from "@/lib/editable";
 import { SiteLayout } from "@/components/site/Layout";

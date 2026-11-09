@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-r
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { uploadSiteImage } from "@/lib/upload-image";
 import { defaults, makeSlug, mergeServices, type CmsCompany, type CmsFaq, type CmsService } from "@/lib/cms";
 import { seoDefaults } from "@/lib/seo";
 import { IconPicker } from "@/components/admin/IconPicker";

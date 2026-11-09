@@ -11,7 +11,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportAppError } from "../lib/error-reporting";
 import { SiteLayout } from "@/components/site/Layout";
 import { useRouterState } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
@@ -41,7 +41,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportAppError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -127,7 +127,7 @@ function RootComponent() {
   const content = Route.useLoaderData();
   applyContent(content);
   useEffect(() => {
-    const extra = JSON.stringify(content ?? {}).match(/\/api\/public\/img\/[\w.-]+/g) ?? [];
+    const extra = JSON.stringify(content ?? {}).match(/(?:\/api\/public\/img\/[\w.-]+|https:\/\/[^"\\]+\/storage\/v1\/object\/sign\/site-images\/[^"\\]+)/g) ?? [];
     preloadSiteImages(Array.from(new Set(extra)));
   }, [content]);
   const router = useRouter();
