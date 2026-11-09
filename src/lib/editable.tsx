@@ -1,4 +1,5 @@
 import { createContext, useContext, type ImgHTMLAttributes, type ReactNode } from "react";
+import { company } from "@/lib/site";
 
 // Saved page texts/images keyed by field id (e.g. "home.hero.0.title"); filled by applyContent().
 export const pageTexts: Record<string, string> = {};
@@ -43,6 +44,12 @@ export function T({ k, d, line }: { k?: string | undefined; d: string; line?: bo
     <textarea className="cms-field" value={v} rows={1}
       onChange={(e) => c.set(k, e.target.value)} onClick={stop} onKeyDown={stop} onKeyUp={(e) => e.preventDefault()} />
   );
+}
+
+export type CompanyField = keyof typeof company;
+/** A Contact Info value (phone, email, address...) that can also be typed over right on the page. */
+export function Co({ f }: { f: CompanyField }) {
+  return <T k={`company.${f}`} d={company[f]} line />;
 }
 
 export const safeImg = (v: string | undefined, d: string) => (v && !v.startsWith("/assets/") ? v : d);
