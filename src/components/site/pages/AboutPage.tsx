@@ -8,7 +8,7 @@ import elecImgAsset from "@/assets/service-electrical.webp";
 import plumbImgAsset from "@/assets/service-plumbing.webp";
 import { PageHeader } from "@/components/site/Layout";
 import { services } from "@/lib/site";
-import { T, Img, Icon, useEditable, useList, ItemTools, AddItem } from "@/lib/editable";
+import { T, Img, Icon, useEditable, useList, ItemTools, AddItem, safeImg } from "@/lib/editable";
 
 function PillarTags({ i, items }: { i: number; items: string[] }) {
   const list = useList(`about.pillar.${i}.tag`, items);

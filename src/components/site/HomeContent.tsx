@@ -20,7 +20,7 @@ const amcImg = amcImgAsset;
 import maintImgAsset from "@/assets/service-maintenance.webp";
 const maintImg = maintImgAsset;
 
-import { T, Img, Icon, useEditable, useList, ItemTools, AddItem } from "@/lib/editable";
+import { T, Img, Icon, useEditable, useList, ItemTools, AddItem, safeImg } from "@/lib/editable";
 
 const slideDefaults = [
   { img: hero1, step: "HVAC", title: "Reliable MEP Solutions for Buildings Across Dubai", text: "Professional electromechanical, HVAC, electrical, plumbing, and maintenance solutions designed to keep your property safe, comfortable, and operating efficiently." },
