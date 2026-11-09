@@ -191,7 +191,7 @@ export function AboutPage() {
                 <div key={id} className="abx-step">
                   <ItemTools list={stepList} id={id} />
                   <span className="abx-step-dot"><Icon k={`about.step.${id}.icon`} d={a.icon} /></span>
-                  <span className="abx-step-num">{i === 0 && c.edit ? <T k="about.stepWord" d="Step" line /> : stepWord} {String(i + 1).padStart(2, "0")}</span>
+                  <span className="abx-step-num">{c.edit ? <T k="about.stepWord" d="Step" line /> : stepWord} {String(i + 1).padStart(2, "0")}</span>
                   <h3><T k={`about.step.${id}.title`} d={a.title} line /></h3>
                   <p className="mb-0"><T k={`about.step.${id}.text`} d={a.text} /></p>
                 </div>
