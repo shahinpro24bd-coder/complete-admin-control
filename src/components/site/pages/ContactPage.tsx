@@ -1,4 +1,4 @@
-import hero1Asset from "@/assets/hero-1.webp.asset.json";
+import hero1Asset from "@/assets/hero-1.webp";
 import { company } from "@/lib/site";
 import { PageHeader } from "@/components/site/Layout";
 import { ContactLine, QuoteForm } from "@/components/site/Sections";
@@ -7,7 +7,7 @@ import { T } from "@/lib/editable";
 export function ContactPage() {
   return (
     <>
-      <PageHeader k="contact" title="Contact" crumb="Contact" image={hero1Asset.url} />
+      <PageHeader k="contact" title="Contact" crumb="Contact" image={hero1Asset} />
       <div className="band py-5">
         <div className="container">
           <div className="row g-5">

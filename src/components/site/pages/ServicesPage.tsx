@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import hero2Asset from "@/assets/hero-2.webp.asset.json";
+import hero2Asset from "@/assets/hero-2.webp";
 import { services } from "@/lib/site";
 import { PageHeader, SectionTitle } from "@/components/site/Layout";
 import { CtaBanner, Process, ServicesGrid } from "@/components/site/Sections";
@@ -8,7 +8,7 @@ import { T, Img, Icon } from "@/lib/editable";
 export function ServicesPage() {
   return (
     <>
-      <PageHeader k="services" title="Services" crumb="Services" image={hero2Asset.url} />
+      <PageHeader k="services" title="Services" crumb="Services" image={hero2Asset} />
       <ServicesGrid />
       <div className="band py-5">
         <div className="container">

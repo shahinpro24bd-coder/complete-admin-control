@@ -2,10 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { company, faqs, processSteps, services, whyUs } from "@/lib/site";
 import { SectionTitle } from "./Layout";
-import about1Asset from "@/assets/about-1.webp.asset.json";
-const about1 = about1Asset.url;
-import about2Asset from "@/assets/about-2.webp.asset.json";
-const about2 = about2Asset.url;
+import about1Asset from "@/assets/about-1.webp";
+const about1 = about1Asset;
+import about2Asset from "@/assets/about-2.webp";
+const about2 = about2Asset;
 import { T, Co, Img, Icon, useEditable, useList, ItemTools, AddItem, type CompanyField } from "@/lib/editable";
 
 export function ServicesGrid() {

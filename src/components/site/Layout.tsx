@@ -1,5 +1,5 @@
 import { T, Co, Icon, useEditable, safeImg } from "@/lib/editable";
-import qmepLogo from "@/assets/qmep-logo.png.asset.json";
+import qmepLogo from "@/assets/qmep-logo.png";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { company, services } from "@/lib/site";
@@ -72,7 +72,7 @@ function Socials({ cls }: { cls: string }) {
 
 function Logo() {
   const c = useEditable();
-  return <img src={safeImg(c.get("site.logo", qmepLogo.url), qmepLogo.url)} alt="QMEP — Where Quality Meets Speed" className={`qn-logo ${c.edit ? "cms-img" : ""}`}
+  return <img src={safeImg(c.get("site.logo", qmepLogo), qmepLogo)} alt="QMEP — Where Quality Meets Speed" className={`qn-logo ${c.edit ? "cms-img" : ""}`}
     title={c.edit ? "Click to change logo" : undefined}
     onClick={c.edit ? (e) => { e.preventDefault(); e.stopPropagation(); c.pick("site.logo"); } : undefined} />;
 }

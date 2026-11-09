@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import hero1Asset from "@/assets/hero-1.webp.asset.json";
-import about1Asset from "@/assets/about-1.webp.asset.json";
-import about2Asset from "@/assets/about-2.webp.asset.json";
-import buildingsAsset from "@/assets/buildings.webp.asset.json";
-import hvacImgAsset from "@/assets/service-hvac.webp.asset.json";
-import elecImgAsset from "@/assets/service-electrical.webp.asset.json";
-import plumbImgAsset from "@/assets/service-plumbing.webp.asset.json";
+import hero1Asset from "@/assets/hero-1.webp";
+import about1Asset from "@/assets/about-1.webp";
+import about2Asset from "@/assets/about-2.webp";
+import buildingsAsset from "@/assets/buildings.webp";
+import hvacImgAsset from "@/assets/service-hvac.webp";
+import elecImgAsset from "@/assets/service-electrical.webp";
+import plumbImgAsset from "@/assets/service-plumbing.webp";
 import { PageHeader } from "@/components/site/Layout";
 import { services } from "@/lib/site";
 import { T, Img, Icon, useEditable, useList, ItemTools, AddItem } from "@/lib/editable";
@@ -20,15 +20,15 @@ function PillarTags({ i, items }: { i: number; items: string[] }) {
   );
 }
 
-const hero1 = hero1Asset.url;
-const about1 = about1Asset.url;
-const about2 = about2Asset.url;
-const buildings = buildingsAsset.url;
+const hero1 = hero1Asset;
+const about1 = about1Asset;
+const about2 = about2Asset;
+const buildings = buildingsAsset;
 
 const pillars = [
-  { letter: "M", word: "Mechanical", img: hvacImgAsset.url, text: "Air conditioning, ventilation and VRF/VRV systems that keep spaces comfortable all year.", items: ["AC & HVAC", "VRF/VRV", "Ventilation"] },
-  { letter: "E", word: "Electrical", img: elecImgAsset.url, text: "Installation, upgrades and fault-finding for safe, dependable power and lighting.", items: ["Power & DB", "Lighting", "Inspections"] },
-  { letter: "P", word: "Plumbing", img: plumbImgAsset.url, text: "Water supply, drainage and leak repairs that protect your property from damage.", items: ["Water supply", "Drainage", "Leak repair"] },
+  { letter: "M", word: "Mechanical", img: hvacImgAsset, text: "Air conditioning, ventilation and VRF/VRV systems that keep spaces comfortable all year.", items: ["AC & HVAC", "VRF/VRV", "Ventilation"] },
+  { letter: "E", word: "Electrical", img: elecImgAsset, text: "Installation, upgrades and fault-finding for safe, dependable power and lighting.", items: ["Power & DB", "Lighting", "Inspections"] },
+  { letter: "P", word: "Plumbing", img: plumbImgAsset, text: "Water supply, drainage and leak repairs that protect your property from damage.", items: ["Water supply", "Drainage", "Leak repair"] },
 ];
 
 const approach = [
