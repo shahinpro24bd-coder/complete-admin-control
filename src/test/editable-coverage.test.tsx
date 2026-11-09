@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderToString } from "react-dom/server";
+import type { JSX } from "react";
 import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from "@tanstack/react-router";
 import { EditContext } from "@/lib/editable";
 import { SiteLayout } from "@/components/site/Layout";
