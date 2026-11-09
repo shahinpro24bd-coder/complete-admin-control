@@ -85,10 +85,10 @@ export function WhyUs() {
               <Img k="why.img1" d={about1} className="why-img-main" alt="MEP engineer on site in Dubai" />
               <Img k="why.img2" d={about2} className="why-img-sub" alt="VRF indoor unit installation" />
               <a className="why-badge" href={company.phoneHref}>
-                <span className="why-badge-icon"><i className="fa fa-phone-alt"></i></span>
+                <span className="why-badge-icon"><Icon k="why.callIcon" d="fa-phone-alt" /></span>
                 <span className="why-badge-text">
                   <small><T k="why.callLabel" d="Call Our Team" line /></small>
-                  <strong>{company.phone}</strong>
+                  <strong><Co f="phone" /></strong>
                 </span>
               </a>
               <span className="why-vert" aria-hidden="true"><T k="why.vert" d="QMEP — MEP Solutions" line /></span>
@@ -117,10 +117,10 @@ export function WhoWeServe({ audiences }: { audiences: Audience[] }) {
           <div className="col-lg-5">
             <div className="d-flex justify-content-lg-end">
               <a className="aud-call" href={company.phoneHref}>
-                <span className="aud-call-icon"><i className="fa fa-phone-alt"></i></span>
+                <span className="aud-call-icon"><Icon k="aud.callIcon" d="fa-phone-alt" /></span>
                 <span className="aud-call-text">
                   <small><T k="aud.callLabel" d="Call Our Team" line /></small>
-                  <strong>{company.phone}</strong>
+                  <strong><Co f="phone" /></strong>
                 </span>
               </a>
             </div>
@@ -187,7 +187,7 @@ export function Process() {
                 <div className="prc-card">
                   <ItemTools list={list} id={id} />
                   <span className="prc-num">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="prc-label">{i === 0 && list.edit ? <T k="prc.stepWord" d="Step" line /> : stepWord} {String(i + 1).padStart(2, "0")}</span>
+                  <span className="prc-label">{list.edit ? <T k="prc.stepWord" d="Step" line /> : stepWord} {String(i + 1).padStart(2, "0")}</span>
                   <h3 className="prc-title"><T k={`prc.${id}.title`} d={p.title} /></h3>
                   <p className="prc-text"><T k={`prc.${id}.text`} d={p.text} /></p>
                   <span className="why-corner" aria-hidden="true" />
@@ -270,7 +270,7 @@ export function QuoteForm() {
   if (sent)
     return (
       <div className="qt-form qt-thanks text-center h-100 d-flex flex-column justify-content-center">
-        <i className="fa fa-check-circle fa-4x text-primary mb-4"></i>
+        <Icon k="form.doneIcon" d="fa-check-circle" className="fa-4x text-primary mb-4" />
         <h3><T k="form.thanksTitle" d="Thank You!" line /></h3>
         <p className="mb-0"><T k="form.thanksText" d="Thank you for contacting QMEP Electromechanical LLC. Your inquiry has been received. Our team will review the information and contact you regarding the next steps." /></p>
       </div>
@@ -324,6 +324,20 @@ export function QuoteForm() {
           ? <textarea rows={2} {...ph("details", "Project Details")} />
           : <textarea name="details" required maxLength={3000} className="form-control" rows={5} placeholder={c.get("form.ph.details", "Project Details")}></textarea>}
       </div>
+      {c.edit && (
+        <div className="col-12 cms-options">
+          <small className="d-block mb-1">Service list's last choice:</small>
+          <T k="form.other" d="Other" line />
+          <small className="d-block mt-3 mb-1">Button text while sending:</small>
+          <T k="form.sending" d="Sending…" line />
+          <small className="d-block mt-3 mb-1">Message if sending fails:</small>
+          <T k="form.error" d="Sorry, we couldn't send your request. Please try again or call us." />
+          <small className="d-block mt-3 mb-1">Thank-you message after sending (click the tick to change it):</small>
+          <div className="text-center"><Icon k="form.doneIcon" d="fa-check-circle" className="fa-3x text-primary mb-2" /></div>
+          <T k="form.thanksTitle" d="Thank You!" line />
+          <T k="form.thanksText" d="Thank you for contacting QMEP Electromechanical LLC. Your inquiry has been received. Our team will review the information and contact you regarding the next steps." />
+        </div>
+      )}
       {err && <div className="col-12 text-danger">{err}</div>}
       <div className="col-12"><button className="btn btn-primary w-100 py-3" type="submit" disabled={busy}>{busy ? c.get("form.sending", "Sending…") : <T k="form.button" d="Request My Quote" line />}</button></div>
     </form>
@@ -340,9 +354,9 @@ export function QuoteSection() {
             <h1 className="display-5 mb-4"><T k="qt.title" d="Need Professional MEP Support?" /></h1>
             <p className="why-lead mb-4"><T k="qt.lead" d="From air conditioning and electrical work to plumbing and planned maintenance, QMEP Electromechanical LLC is ready to discuss your requirements. Tell us about your property or project, and let us help you identify the next steps." /></p>
             <div className="row g-3">
-              <ContactLine icon="fa-phone-alt" k="qt.l1" label="Call Our Team" value={company.phone} href={company.phoneHref} />
+              <ContactLine icon="fa-phone-alt" k="qt.l1" label="Call Our Team" value={company.phone} field="phone" href={company.phoneHref} />
               <ContactLine icon="fa-whatsapp" brand k="qt.l2" label="Chat on WhatsApp" value="Message Us Now" editValue href={company.whatsappHref} />
-              <ContactLine icon="fa-envelope-open" k="qt.l3" label="Mail Us Now" value={company.email} href={`mailto:${company.email}`} />
+              <ContactLine icon="fa-envelope-open" k="qt.l3" label="Mail Us Now" value={company.email} field="email" href={`mailto:${company.email}`} />
             </div>
           </div>
           <div className="col-lg-7"><QuoteForm /></div>
@@ -353,12 +367,12 @@ export function QuoteSection() {
 }
 
 /** Contact row. Values that come from Contact Info stay there; `editValue` makes a fixed value editable here. */
-export function ContactLine({ icon, label, value, href, brand, k, editValue }: { icon: string; label: string; value: string; href?: string; brand?: boolean; k?: string; editValue?: boolean }) {
+export function ContactLine({ icon, label, value, href, brand, k, editValue, field }: { icon: string; label: string; value: string; href?: string; brand?: boolean; k?: string; editValue?: boolean; field?: CompanyField }) {
   return (
     <div className="col-12">
       <a className="qt-line" href={href} target={href?.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
-        <span className="qt-line-icon"><i className={`${brand ? "fab" : "fa"} ${icon}`}></i></span>
-        <span className="qt-line-text"><small><T k={k && `${k}.label`} d={label} line /></small><strong>{editValue ? <T k={k && `${k}.value`} d={value} line /> : value}</strong></span>
+        <span className="qt-line-icon">{brand ? <i className={`fab ${icon}`}></i> : <Icon k={k && `${k}.icon`} d={icon} />}</span>
+        <span className="qt-line-text"><small><T k={k && `${k}.label`} d={label} line /></small><strong>{field ? <Co f={field} /> : editValue ? <T k={k && `${k}.value`} d={value} line /> : value}</strong></span>
         <i className="fa fa-arrow-right qt-line-arrow"></i>
       </a>
     </div>
