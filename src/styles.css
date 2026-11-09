@@ -723,3 +723,6 @@ small, .small { color: #5A6472; }
 .pj-media [class*="kicker"], .pj-media [class*="cat"], .pj-media small { color: #A9C8FF !important; }
 .footer .btn-outline-body, .bg-dark .btn-outline-body { color: #D5E2F7; border-color: rgba(213,226,247,.45); }
 .footer .btn-outline-body:hover, .bg-dark .btn-outline-body:hover { color: #fff; }
+
+/* Page editor: stop the moving service strip so its words can be typed into. */
+.cms-editing .abx-marquee-track { animation-play-state: paused; }

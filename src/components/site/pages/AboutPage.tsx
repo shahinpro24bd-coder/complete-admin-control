@@ -90,7 +90,7 @@ export function AboutPage() {
       <div className="abx-marquee" aria-hidden="true">
         <div className="abx-marquee-track">
           {[...services, ...services].map((sv, i) => (
-            <span key={i}><i className={`fa ${sv.icon}`}></i>{sv.title}</span>
+            <span key={i}><Icon k={`services.${i % services.length}.icon`} d={sv.icon} /><T k={`services.${i % services.length}.title`} d={sv.title} line /></span>
           ))}
         </div>
       </div>
@@ -191,7 +191,7 @@ export function AboutPage() {
                 <div key={id} className="abx-step">
                   <ItemTools list={stepList} id={id} />
                   <span className="abx-step-dot"><Icon k={`about.step.${id}.icon`} d={a.icon} /></span>
-                  <span className="abx-step-num">{i === 0 && c.edit ? <T k="about.stepWord" d="Step" line /> : stepWord} {String(i + 1).padStart(2, "0")}</span>
+                  <span className="abx-step-num">{c.edit ? <T k="about.stepWord" d="Step" line /> : stepWord} {String(i + 1).padStart(2, "0")}</span>
                   <h3><T k={`about.step.${id}.title`} d={a.title} line /></h3>
                   <p className="mb-0"><T k={`about.step.${id}.text`} d={a.text} /></p>
                 </div>
@@ -210,7 +210,7 @@ export function AboutPage() {
               <h2 className="sd-title mb-0"><T k="about.clients.title" d="From single homes to commercial sites" /></h2>
             </div>
             <div className="abx-chips">
-              {clientList.ids.map((id) => <span key={id}><i className="fa fa-check"></i><T k={`about.client.${id}`} d={clientList.def(id)} line />{c.edit && <ItemTools list={clientList} id={id} />}</span>)}
+              {clientList.ids.map((id) => <span key={id}><Icon k="about.client.icon" d="fa-check" /><T k={`about.client.${id}`} d={clientList.def(id)} line />{c.edit && <ItemTools list={clientList} id={id} />}</span>)}
               <AddItem list={clientList} label="Add" />
             </div>
           </div>
@@ -221,7 +221,7 @@ export function AboutPage() {
         onClick={c.edit ? (e) => { if (e.target === e.currentTarget) c.pick("about.commit.image"); } : undefined}>
         <div className="container">
           <div className="abx-commit-inner">
-            <i className="fa fa-quote-left abx-quote"></i>
+            <Icon k="about.commit.icon" d="fa-quote-left" className="abx-quote" />
             <span className="ind-kicker"><T k="about.commit.kicker" d="Our Commitment" line /></span>
             <p className="abx-commit-text"><T k="about.commit.text" d="Every property has different requirements. We aim to understand those requirements, explain the available options, and agree on a clear scope of work before starting a project." /></p>
             <div className="d-flex flex-wrap gap-2 justify-content-center">

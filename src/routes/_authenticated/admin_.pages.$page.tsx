@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type JSX } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { defaults, mergeServices, type CmsFaq, type CmsService } from "@/lib/cms";
+import { defaults, mergeServices, withPhone, type CmsCompany, type CmsFaq, type CmsService } from "@/lib/cms";
 import { EditContext } from "@/lib/editable";
 import { SiteLayout } from "@/components/site/Layout";
 import { HomeContent } from "@/components/site/HomeContent";
@@ -49,6 +49,7 @@ export const Route = createFileRoute("/_authenticated/admin_/pages/$page")({
 const svcRe = /^services\.(\d+)\.(title|summary|cta|image|icon)$/;
 const itemRe = /^services\.(\d+)\.items\.(\d+)$/;
 const faqRe = /^faqs\.(\d+)\.(q|a)$/;
+const coRe = /^company\.(\w+)$/;
 
 function PageEditor() {
   const { page } = Route.useParams();
@@ -58,6 +59,7 @@ function PageEditor() {
   const [texts, setTexts] = useState<Record<string, string>>({});
   const [services, setServices] = useState<CmsService[]>(defaults.services.map((s) => ({ ...s, items: [...s.items] })));
   const [faqs, setFaqs] = useState<CmsFaq[]>(defaults.faqs.map((f) => ({ ...f })));
+  const [co, setCo] = useState<CmsCompany>({ ...defaults.company });
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -75,6 +77,7 @@ function PageEditor() {
         if (r.key === "texts") setTexts((r.value ?? {}) as Record<string, string>);
         if (r.key === "services") setServices(mergeServices(r.value as CmsService[]).map((s) => ({ ...s, items: [...s.items] })));
         if (r.key === "faqs" && Array.isArray(r.value) && r.value.length) setFaqs(r.value as CmsFaq[]);
+        if (r.key === "company" && r.value) setCo({ ...defaults.company, ...(r.value as object) });
       }
       setReady("ok");
     })();
@@ -94,6 +97,8 @@ function PageEditor() {
       if (m) return services[+m[1]!]?.items[+m[2]!] ?? d;
       m = k.match(faqRe);
       if (m) return faqs[+m[1]!]?.[m[2] as "q"] ?? d;
+      m = k.match(coRe);
+      if (m && m[1]! in co) return co[m[1] as keyof CmsCompany] ?? d;
       return texts[k] ?? d;
     };
     const set = (k: string, v: string) => {
@@ -104,6 +109,8 @@ function PageEditor() {
       if (m) { const i = +m[1]!, n = +m[2]!; setServices((s) => s.map((x, j) => (j === i ? { ...x, items: x.items.map((it, q) => (q === n ? v : it)) } : x))); return; }
       m = k.match(faqRe);
       if (m) { const i = +m[1]!, f = m[2]!; setFaqs((s) => s.map((x, j) => (j === i ? { ...x, [f]: v } : x))); return; }
+      m = k.match(coRe);
+      if (m && m[1]! in defaults.company) { const f = m[1] as keyof CmsCompany; setCo((c) => (f === "phone" ? withPhone(c, v) : { ...c, [f]: v })); return; }
       setTexts((t) => ({ ...t, [k]: v }));
     };
     return {
@@ -125,7 +132,7 @@ function PageEditor() {
         },
       },
     };
-  }, [texts, services, faqs]);
+  }, [texts, services, faqs, co]);
 
   const onFile = async (file: File) => {
     const k = pickKey.current;
@@ -148,6 +155,7 @@ function PageEditor() {
       { key: "texts", value: clean, updated_at: now },
       { key: "services", value: services.map((s) => ({ ...s, items: s.items.filter((x) => x.trim()) })), updated_at: now },
       { key: "faqs", value: faqs.filter((f) => f.q.trim()), updated_at: now },
+      { key: "company", value: co, updated_at: now },
     ] as never);
     setSaving(false);
     if (error) { toast.error("Could not save: " + error.message); return; }

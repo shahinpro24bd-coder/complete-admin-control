@@ -1,4 +1,4 @@
-import { T, useEditable, safeImg } from "@/lib/editable";
+import { T, Co, Icon, useEditable, safeImg } from "@/lib/editable";
 import qmepLogo from "@/assets/qmep-logo.png.asset.json";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
@@ -12,20 +12,20 @@ export function Topbar() {
         <div className="col-lg-7 px-5 text-start">
           <div className="h-100 d-inline-flex align-items-center py-3 me-3">
             <a className="text-body px-2" href={company.phoneHref}>
-              <i className="fa fa-phone-alt text-primary me-2"></i>
-              {company.phone}
+              <Icon k="top.phoneIcon" d="fa-phone-alt" className="text-primary me-2" />
+              <Co f="phone" />
             </a>
             <a className="text-body px-2" href={`mailto:${company.email}`}>
-              <i className="fa fa-envelope-open text-primary me-2"></i>
-              {company.email}
+              <Icon k="top.emailIcon" d="fa-envelope-open" className="text-primary me-2" />
+              <Co f="email" />
             </a>
           </div>
         </div>
         <div className="col-lg-5 px-5 text-end">
           <div className="h-100 d-inline-flex align-items-center py-3 me-2">
             <span className="text-body px-2">
-              <i className="fa fa-clock text-primary me-2"></i>
-              {company.hours}
+              <Icon k="top.hoursIcon" d="fa-clock" className="text-primary me-2" />
+              <Co f="hours" />
             </span>
           </div>
           <div className="h-100 d-inline-flex align-items-center">
@@ -117,7 +117,7 @@ export function Navbar() {
               <div className="qn-panel">
                 {moreLinks.map((m) => (
                   <Link key={m.to} to={m.to} className="qn-panel-item" activeProps={{ className: "qn-panel-item is-active" }}>
-                    <span className="qn-panel-icon"><i className={`fa ${m.icon}`}></i></span>
+                    <span className="qn-panel-icon"><Icon k={`${m.k}.icon`} d={m.icon} /></span>
                     <span className="qn-panel-text"><strong><T k={m.k} d={m.label} line /></strong><small><T k={`${m.k}.desc`} d={m.desc} line /></small></span>
                     <i className="fa fa-arrow-right qn-panel-arrow"></i>
                   </Link>
@@ -129,8 +129,8 @@ export function Navbar() {
 
           <div className="qn-actions">
             <a href={company.phoneHref} className="qn-call">
-              <span className="qn-call-icon"><i className="fa fa-phone-alt"></i></span>
-              <span className="qn-call-text"><small><T k="nav.callLabel" d="Call 24/7" line /></small><strong>{company.phone}</strong></span>
+              <span className="qn-call-icon"><Icon k="nav.callIcon" d="fa-phone-alt" /></span>
+              <span className="qn-call-text"><small><T k="nav.callLabel" d="Call 24/7" line /></small><strong><Co f="phone" /></strong></span>
             </a>
             <Link to="/contact" className="qn-cta">
               <span><T k="nav.cta" d="Free Quote" line /></span><i className="fa fa-arrow-right"></i>
@@ -154,7 +154,7 @@ export function Navbar() {
             </Link>
           ))}
           <div className="qn-drawer-foot">
-            <a href={company.phoneHref} className="qn-cta w-100 justify-content-center"><i className="fa fa-phone-alt"></i><span>{company.phone}</span></a>
+            <a href={company.phoneHref} className="qn-cta w-100 justify-content-center"><Icon k="nav.callIcon" d="fa-phone-alt" /><span><Co f="phone" /></span></a>
             <a href={company.whatsappHref} target="_blank" rel="noreferrer" className="qn-drawer-wa"><i className="fab fa-whatsapp"></i> <T k="nav.drawerWa" d="Chat on WhatsApp" line /></a>
           </div>
         </aside>
@@ -204,7 +204,7 @@ export function Footer() {
         <div className="ft-cta">
           <div><span className="ft-cta-kicker"><T k="footer.kicker" d="Get In Touch" line /></span><h2 className="mb-0"><T k="footer.title" d="Ready to discuss your MEP requirements?" /></h2></div>
           <div className="d-flex flex-wrap gap-2">
-            <a href={company.phoneHref} className="btn btn-primary py-3 px-4"><i className="fa fa-phone-alt me-2"></i>{company.phone}</a>
+            <a href={company.phoneHref} className="btn btn-primary py-3 px-4"><Icon k="footer.callIcon" d="fa-phone-alt" className="me-2" /><Co f="phone" /></a>
             <a href={company.whatsappHref} target="_blank" rel="noreferrer" className="btn ft-ghost py-3 px-4"><i className="fab fa-whatsapp me-2"></i><T k="footer.wa" d="WhatsApp" line /></a>
           </div>
         </div>
@@ -221,8 +221,8 @@ export function Footer() {
           </div>
           <div className="col-lg-3 col-md-6">
             <h3 className="text-light mb-4 ft-h"><T k="footer.svcTitle" d="Our Services" line /></h3>
-            {services.map((s) => (
-              <Link key={s.slug} className="btn btn-link" to="/services/$slug" params={{ slug: s.slug }}>{s.title}</Link>
+            {services.map((s, n) => (
+              <Link key={s.slug} className="btn btn-link" to="/services/$slug" params={{ slug: s.slug }}><T k={`services.${n}.title`} d={s.title} line /></Link>
             ))}
           </div>
           <div className="col-lg-3 col-md-6">
@@ -237,10 +237,10 @@ export function Footer() {
           </div>
           <div className="col-lg-3 col-md-6">
             <h3 className="text-light mb-4 ft-h"><T k="footer.contactTitle" d="Contact" line /></h3>
-            <p className="mb-2"><i className="fa fa-map-marker-alt text-primary me-3"></i>{company.address}</p>
-            <p className="mb-2"><i className="fa fa-phone-alt text-primary me-3"></i>{company.phone}</p>
+            <p className="mb-2"><Icon k="footer.addrIcon" d="fa-map-marker-alt" className="text-primary me-3" /><Co f="address" /></p>
+            <p className="mb-2"><Icon k="footer.phoneIcon" d="fa-phone-alt" className="text-primary me-3" /><Co f="phone" /></p>
             <p className="mb-2"><i className="fab fa-whatsapp text-primary me-3"></i><a className="text-body" href={company.whatsappHref} target="_blank" rel="noreferrer"><T k="footer.waUs" d="WhatsApp Us" line /></a></p>
-            <p className="mb-2"><i className="fa fa-envelope text-primary me-3"></i>{company.email}</p>
+            <p className="mb-2"><Icon k="footer.emailIcon" d="fa-envelope" className="text-primary me-3" /><Co f="email" /></p>
           </div>
         </div>
       </div>
@@ -248,7 +248,7 @@ export function Footer() {
         <div className="container">
           <div className="row">
             <div className="col-md-6 text-center text-md-start mb-3 mb-md-0">
-              &copy; {new Date().getFullYear()} <Link to="/">{company.name}</Link>. <T k="footer.rights" d="All Rights Reserved." line />
+              <T k="footer.copy" d="©" line /> {new Date().getFullYear()} <Link to="/"><Co f="name" /></Link>. <T k="footer.rights" d="All Rights Reserved." line />
             </div>
             <div className="col-md-6 text-center text-md-end"><T k="footer.location" d="Dubai, United Arab Emirates" line /></div>
           </div>
