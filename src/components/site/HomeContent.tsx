@@ -80,7 +80,7 @@ export function HomeContent() {
       {/* Hero */}
       <section className="hero">
         {slides.ids.map((id, n) => (
-          <img key={id} className={`hero-bg ${n === i ? "is-active" : ""}`} src={get(`home.hero.${id}.img`, slides.def(id).img)} alt="" loading="eager" decoding="async" width={1920} height={1088} />
+          <img key={id} data-cms-img={edit ? "slide" : undefined} className={`hero-bg ${n === i ? "is-active" : ""}`} src={get(`home.hero.${id}.img`, slides.def(id).img)} alt="" loading="eager" decoding="async" width={1920} height={1088} />
         ))}
         <div className="hero-overlay" />
         <div className="container hero-content">
@@ -199,7 +199,7 @@ export function HomeContent() {
                   <h1 className="mb-3"><T k={`services.${tab}.title`} d={cur.s.title} /></h1>
                   <p className="mb-4"><T k={`services.${tab}.summary`} d={cur.s.summary} /></p>
                   {cur.s.items.slice(0, 3).map((it, j) => (
-                    <p key={j}><i className="fa fa-check text-primary me-3"></i><T k={`services.${tab}.items.${j}`} d={it} /></p>
+                    <p key={j}><Icon k="home.proj.checkIcon" d="fa-check" className="text-primary me-3" /><T k={`services.${tab}.items.${j}`} d={it} /></p>
                   ))}
                   <Link to="/projects" className="btn btn-primary py-3 px-5 mt-3"><T k="home.proj.btn" d="View Our Projects" line /></Link>
                 </div>

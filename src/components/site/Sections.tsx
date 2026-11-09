@@ -6,7 +6,7 @@ import about1Asset from "@/assets/about-1.webp.asset.json";
 const about1 = about1Asset.url;
 import about2Asset from "@/assets/about-2.webp.asset.json";
 const about2 = about2Asset.url;
-import { T, Img, Icon, useEditable, useList, ItemTools, AddItem } from "@/lib/editable";
+import { T, Co, Img, Icon, useEditable, useList, ItemTools, AddItem, type CompanyField } from "@/lib/editable";
 
 export function ServicesGrid() {
   return (

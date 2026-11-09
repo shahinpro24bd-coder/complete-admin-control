@@ -16,11 +16,11 @@ export function ContactPage() {
               <h1 className="display-5 mb-4"><T k="contact.title" d="Let's Discuss Your MEP Requirements" /></h1>
               <p className="mb-4"><T k="contact.lead" d="Looking for HVAC maintenance, electrical work, plumbing services, or an electromechanical solution for your property? Contact our team to discuss the scope of work and request a quotation." /></p>
               <div className="row g-4">
-                <ContactLine k="contact.l1" icon="fa-map-marker-alt" label="Our Office" value={company.address} />
-                <ContactLine k="contact.l2" icon="fa-phone-alt" label="Call Us Now" value={company.phone} href={company.phoneHref} />
+                <ContactLine k="contact.l1" icon="fa-map-marker-alt" label="Our Office" value={company.address} field="address" />
+                <ContactLine k="contact.l2" icon="fa-phone-alt" label="Call Us Now" value={company.phone} field="phone" href={company.phoneHref} />
                 <ContactLine k="contact.l3" icon="fa-whatsapp" brand label="WhatsApp" value="Chat With Us" editValue href={company.whatsappHref} />
-                <ContactLine k="contact.l4" icon="fa-envelope-open" label="Mail Us Now" value={company.email} href={`mailto:${company.email}`} />
-                <ContactLine k="contact.l5" icon="fa-clock" label="Working Hours" value={company.hours} />
+                <ContactLine k="contact.l4" icon="fa-envelope-open" label="Mail Us Now" value={company.email} field="email" href={`mailto:${company.email}`} />
+                <ContactLine k="contact.l5" icon="fa-clock" label="Working Hours" value={company.hours} field="hours" />
               </div>
             </div>
             <div className="col-lg-6">

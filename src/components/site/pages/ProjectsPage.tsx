@@ -42,13 +42,13 @@ export function ProjectsPage() {
               {c.edit ? <T k="projects.filterAll" d="All" line /> : allWord}<span>{cards.length}</span>
             </button>
             {sectors.map((f) => (
-              <button key={f} type="button" role="tab" aria-selected={filter === f}
+              <button key={f} type="button" role="tab" aria-selected={filter === f} data-derived="sector"
                 className={`pj-filter ${filter === f ? "is-active" : ""}`} onClick={() => setFilter(f)}>
                 {f}<span>{cards.filter((x) => x.sector.trim() === f).length}</span>
               </button>
             ))}
           </div>
-          {c.edit && <p className="text-center small text-muted">Filter buttons are made from each project's category (the label on the photo).</p>}
+          {c.edit && <p className="text-center small text-muted cms-hint">Filter buttons are made from each project's category (the label on the photo).</p>}
           <div className="pj-grid">
             {shown.map((p, i) => (
               <article key={p.id} className="pj-card">

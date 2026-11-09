@@ -3,7 +3,7 @@ import hero2Asset from "@/assets/hero-2.webp.asset.json";
 import { services } from "@/lib/site";
 import { PageHeader, SectionTitle } from "@/components/site/Layout";
 import { CtaBanner, Process, ServicesGrid } from "@/components/site/Sections";
-import { T, Img } from "@/lib/editable";
+import { T, Img, Icon } from "@/lib/editable";
 
 export function ServicesPage() {
   return (
@@ -24,7 +24,7 @@ export function ServicesPage() {
                 <p className="mb-4"><T k={`services.${n}.summary`} d={s.summary} /></p>
                 <div className="row">
                   {s.items.map((it, j) => (
-                    <div key={j} className="col-sm-6"><p><i className="fa fa-check text-primary me-3"></i><T k={`services.${n}.items.${j}`} d={it} /></p></div>
+                    <div key={j} className="col-sm-6"><p><Icon k="services.checkIcon" d="fa-check" className="text-primary me-3" /><T k={`services.${n}.items.${j}`} d={it} /></p></div>
                   ))}
                 </div>
                 <div className="d-flex flex-wrap gap-2 mt-2">

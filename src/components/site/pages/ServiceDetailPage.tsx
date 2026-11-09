@@ -4,7 +4,7 @@ import { company, services } from "@/lib/site";
 import { PageHeader } from "@/components/site/Layout";
 import { CtaBanner } from "@/components/site/Sections";
 import { getServiceDetail } from "@/lib/service-details";
-import { T, Img, Icon, useList, ItemTools, AddItem } from "@/lib/editable";
+import { T, Co, Img, Icon, useList, ItemTools, AddItem } from "@/lib/editable";
 
 export function ServiceDetailPage({ slug }: { slug: string }) {
   const idx = services.findIndex((s) => s.slug === slug);
@@ -40,7 +40,7 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
                 <Img k={`${sv}.image`} d={s.image} alt={s.title} className="sd-img" decoding="async" />
                 <span className="sd-frame" aria-hidden="true" />
                 <div className="sd-badge">
-                  <span className="sd-badge-icon"><i className={`fa ${s.icon}`}></i></span>
+                  <span className="sd-badge-icon"><Icon k={`${sv}.icon`} d={s.icon} /></span>
                   <span><small><T k="sd.badge" d="Service" line /></small><strong>{String(idx + 1).padStart(2, "0")} / {String(services.length).padStart(2, "0")}</strong></span>
                 </div>
               </div>
@@ -81,7 +81,7 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
             {s.items.map((it, i) => (
               <div key={i} className="sd-scope-item">
                 <span className="sd-scope-num">{String(i + 1).padStart(2, "0")}</span>
-                <i className="fa fa-check sd-scope-check"></i>
+                <Icon k="sd.scope.icon" d="fa-check" className="sd-scope-check" />
                 <h3><T k={`${sv}.items.${i}`} d={it} /></h3>
               </div>
             ))}
@@ -101,7 +101,7 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
             <div className="col-lg-7">
               <ul className="sd-signs-list">
                 {signs.ids.map((id) => (
-                  <li key={id}><ItemTools list={signs} id={id} /><i className="fa fa-exclamation"></i><T k={`${p}.sign.${id}`} d={signs.def(id)} /></li>
+                  <li key={id}><ItemTools list={signs} id={id} /><Icon k="sd.signs.icon" d="fa-exclamation" /><T k={`${p}.sign.${id}`} d={signs.def(id)} /></li>
                 ))}
               </ul>
               <AddItem list={signs} label="Add sign" />
@@ -144,8 +144,8 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
                 <Link to="/services/$slug" params={{ slug: o.slug }} className="sd-other">
                   <Img k={`services.${o.n}.image`} d={o.image} alt={o.title} />
                   <span className="sd-other-body">
-                    <span className="sd-other-icon"><i className={`fa ${o.icon}`}></i></span>
-                    <strong>{o.title}</strong>
+                    <span className="sd-other-icon"><Icon k={`services.${o.n}.icon`} d={o.icon} /></span>
+                    <strong><T k={`services.${o.n}.title`} d={o.title} line /></strong>
                     <i className="fa fa-arrow-right sd-other-arrow"></i>
                   </span>
                 </Link>
@@ -161,7 +161,7 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
             <div className="col-lg-4">
               <span className="ind-kicker"><T k="sd.faq.kicker" d="Questions" line /></span>
               <h2 className="sd-title"><T k={`${p}.faqTitle`} d={`${s.title} FAQs`} /></h2>
-              <a href={company.phoneHref} className="aud-call mt-3"><i className="fa fa-phone-alt"></i> {company.phone}</a>
+              <a href={company.phoneHref} className="aud-call mt-3"><Icon k="sd.faq.callIcon" d="fa-phone-alt" /> <Co f="phone" /></a>
             </div>
             <div className="col-lg-8">
               {faqs.ids.map((id, i) => {

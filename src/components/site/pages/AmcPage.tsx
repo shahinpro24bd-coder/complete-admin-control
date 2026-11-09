@@ -16,7 +16,7 @@ function PlanItems({ i, items }: { i: number; items: string[] }) {
   return (
     <>
       {list.ids.map((id) => (
-        <p key={id} className="text-start position-relative"><ItemTools list={list} id={id} /><i className="fa fa-check text-primary me-3"></i><T k={`amc.plan.${i}.item.${id}`} d={list.def(id)} /></p>
+        <p key={id} className="text-start position-relative"><ItemTools list={list} id={id} /><Icon k="amc.checkIcon" d="fa-check" className="text-primary me-3" /><T k={`amc.plan.${i}.item.${id}`} d={list.def(id)} /></p>
       ))}
       <AddItem list={list} label="Add line" />
     </>
