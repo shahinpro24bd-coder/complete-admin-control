@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-r
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { uploadSiteImage } from "@/lib/upload-image";
+import { resolveImg } from "@/lib/images";
 import { defaults, makeSlug, mergeServices, type CmsCompany, type CmsFaq, type CmsService } from "@/lib/cms";
 import { seoDefaults } from "@/lib/seo";
 import { IconPicker } from "@/components/admin/IconPicker";
@@ -111,11 +113,9 @@ function AdminPage() {
   };
 
   const upload = async (idx: number, file: File) => {
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const name = `${services[idx]!.slug}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("site-images").upload(name, file, { contentType: file.type, cacheControl: "31536000" });
-    if (error) { toast.error("Upload failed: " + error.message); return; }
-    setServices((s) => s.map((x, i) => (i === idx ? { ...x, image: `/api/public/img/${name}` } : x)));
+    const { url, error } = await uploadSiteImage(file, services[idx]!.slug);
+    if (error || !url) { toast.error("Upload failed: " + error); return; }
+    setServices((s) => s.map((x, i) => (i === idx ? { ...x, image: url } : x)));
     touch();
     toast.success("Image uploaded — click Save to publish.");
   };
@@ -220,7 +220,7 @@ function AdminPage() {
                   </div>
                   <div className="row g-4">
                     <div className="col-md-3">
-                      <img src={s.image} alt={s.title} className="w-100 mb-2" style={{ aspectRatio: "4/3", objectFit: "cover" }} />
+                      <img src={resolveImg(s.image, s.image)} alt={s.title} className="w-100 mb-2" style={{ aspectRatio: "4/3", objectFit: "cover" }} />
                       <label className="btn btn-outline-primary btn-sm w-100 mb-2">
                         <i className="fa fa-upload me-1"></i>Change image
                         <input type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && upload(i, e.target.files[0])} />

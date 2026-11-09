@@ -8,7 +8,7 @@ import elecImgAsset from "@/assets/service-electrical.webp";
 import plumbImgAsset from "@/assets/service-plumbing.webp";
 import { PageHeader } from "@/components/site/Layout";
 import { services } from "@/lib/site";
-import { T, Img, Icon, useEditable, useList, ItemTools, AddItem } from "@/lib/editable";
+import { T, Img, Icon, useEditable, useList, ItemTools, AddItem, safeImg } from "@/lib/editable";
 
 function PillarTags({ i, items }: { i: number; items: string[] }) {
   const list = useList(`about.pillar.${i}.tag`, items);
@@ -52,7 +52,7 @@ const values = [
 export function AboutPage() {
   const c = useEditable();
   const commitRaw = c.get("about.commit.image", about2);
-  const commitImg = commitRaw && !commitRaw.startsWith("/assets/") ? commitRaw : about2;
+  const commitImg = safeImg(commitRaw, about2);
   const pillarList = useList("about.pillar", pillars);
   const valueList = useList("about.value", values);
   const stepList = useList("about.step", approach);

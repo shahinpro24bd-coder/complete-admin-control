@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type JSX } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { uploadSiteImage } from "@/lib/upload-image";
 import { defaults, mergeServices, withPhone, type CmsCompany, type CmsFaq, type CmsService } from "@/lib/cms";
 import { EditContext } from "@/lib/editable";
 import { SiteLayout } from "@/components/site/Layout";
@@ -138,12 +139,10 @@ function PageEditor() {
     const k = pickKey.current;
     if (!k) return;
     setUploading(true);
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const name = `${k.replace(/[^\w-]/g, "-")}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("site-images").upload(name, file, { contentType: file.type, cacheControl: "31536000" });
+    const { url, error } = await uploadSiteImage(file, k);
     setUploading(false);
-    if (error) { toast.error("Upload failed: " + error.message); return; }
-    ctx.set(k, `/api/public/img/${name}`);
+    if (error || !url) { toast.error("Upload failed: " + error); return; }
+    ctx.set(k, url);
     toast.success("Image changed — click Save to publish.");
   };
 

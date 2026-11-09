@@ -1,5 +1,6 @@
 import { company, services, faqs, type Service } from "@/lib/site";
 import { setPageTexts } from "@/lib/editable";
+import { resolveImg } from "@/lib/images";
 
 export type CmsCompany = typeof company;
 export type CmsService = { slug: string; title: string; summary: string; items: string[]; cta: string; image: string; icon: string };
@@ -31,7 +32,7 @@ export function mergeServices(saved: Partial<CmsService>[] | null | undefined): 
       summary: sv.summary ?? base?.summary ?? "",
       cta: sv.cta || base?.cta || "Request a Quote",
       icon: sv.icon || base?.icon || "fa-tools",
-      image: sv.image && !sv.image.startsWith("/assets/") ? sv.image : fallbackImg,
+      image: resolveImg(sv.image, fallbackImg),
       items: sv.items?.filter((x) => x.trim()).length ? sv.items.filter((x) => x.trim()) : base?.items ?? [],
     });
   }

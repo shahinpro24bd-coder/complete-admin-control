@@ -6,8 +6,10 @@ import type { SiteContent } from "@/lib/cms";
 // Public read of the editable site content (site_content allows anonymous reads).
 export const getSiteContent = createServerFn({ method: "GET" }).handler(async (): Promise<SiteContent> => {
   try {
-    const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
-    const url = process.env["SUPABASE_URL"];
+    // Hosts like Vercel don't load the .env file at runtime, so fall back to the public
+    // values baked in at build time — otherwise saved admin edits would not show there.
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"] || import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
+    const url = process.env["SUPABASE_URL"] || import.meta.env["VITE_SUPABASE_URL"];
     if (!key || !url) return {};
     const sb = createClient<Database>(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },

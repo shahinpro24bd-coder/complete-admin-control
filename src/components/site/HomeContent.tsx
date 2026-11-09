@@ -20,7 +20,7 @@ const amcImg = amcImgAsset;
 import maintImgAsset from "@/assets/service-maintenance.webp";
 const maintImg = maintImgAsset;
 
-import { T, Img, Icon, useEditable, useList, ItemTools, AddItem } from "@/lib/editable";
+import { T, Img, Icon, useEditable, useList, ItemTools, AddItem, safeImg } from "@/lib/editable";
 
 const slideDefaults = [
   { img: hero1, step: "HVAC", title: "Reliable MEP Solutions for Buildings Across Dubai", text: "Professional electromechanical, HVAC, electrical, plumbing, and maintenance solutions designed to keep your property safe, comfortable, and operating efficiently." },
@@ -80,7 +80,7 @@ export function HomeContent() {
       {/* Hero */}
       <section className="hero">
         {slides.ids.map((id, n) => (
-          <img key={id} data-cms-img={edit ? "slide" : undefined} className={`hero-bg ${n === i ? "is-active" : ""}`} src={get(`home.hero.${id}.img`, slides.def(id).img)} alt="" loading="eager" decoding="async" width={1920} height={1088} />
+          <img key={id} data-cms-img={edit ? "slide" : undefined} className={`hero-bg ${n === i ? "is-active" : ""}`} src={safeImg(get(`home.hero.${id}.img`, slides.def(id).img), slides.def(id).img)} alt="" loading="eager" decoding="async" width={1920} height={1088} />
         ))}
         <div className="hero-overlay" />
         <div className="container hero-content">

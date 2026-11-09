@@ -166,7 +166,7 @@ export function Navbar() {
 export function PageHeader({ title, crumb, image, k }: { title: string; crumb: string; image: string; k?: string }) {
   const c = useEditable();
   const raw = k ? c.get(`${k}.header.image`, image) : image;
-  const img = raw && !raw.startsWith("/assets/") ? raw : image;
+  const img = safeImg(raw, image);
   return (
     <div
       className={`container-fluid page-header py-5 mb-5 ${c.edit && k ? "cms-img" : ""}`}

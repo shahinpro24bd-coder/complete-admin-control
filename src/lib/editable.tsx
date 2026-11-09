@@ -1,5 +1,6 @@
 import { createContext, useContext, type ImgHTMLAttributes, type ReactNode } from "react";
 import { company } from "@/lib/site";
+import { resolveImg } from "@/lib/images";
 
 // Saved page texts/images keyed by field id (e.g. "home.hero.0.title"); filled by applyContent().
 export const pageTexts: Record<string, string> = {};
@@ -52,7 +53,7 @@ export function Co({ f }: { f: CompanyField }) {
   return <T k={`company.${f}`} d={company[f]} line />;
 }
 
-export const safeImg = (v: string | undefined, d: string) => (v && !v.startsWith("/assets/") ? v : d);
+export const safeImg = (v: string | undefined, d: string) => resolveImg(v, d);
 
 /** Image that can be clicked to replace in the admin page editor. */
 export function Img({ k, d, className, ...rest }: { k: string; d: string } & ImgHTMLAttributes<HTMLImageElement>) {
